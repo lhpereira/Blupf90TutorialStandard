@@ -1,7 +1,7 @@
 ---
 title: Quick tour of BLUPF90
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -9,11 +9,11 @@ tags: [introduction,tutorial]
 Trivial analyses for fixed models
 =================================
 
-This section describes the basic design and essential elements of BLUPF90 programs. We will explain how to prepare a data file and how to describe a parameter file using simple fixed effect models. Most of the basic ideas will be introduced here and you can expand to more complicated models.
+This section describes the basic design and essential elements of BLUPF90 programs. We will explain how to prepare a data file and how to describe a parameter file using simple fixed-effect models. Most of the basic ideas will be introduced here, and you can extend them to more complicated models.
 
-We use the BLUPF90 program here. BLUPF90 quickly solves mixed model equations and saves the solutions to a file. This program also solves the least squares equations (i.e., normal equations) for fixed effect models. Other programs for variance component estimation (e.g., AIREMLF90 and GIBBSF90) also accept the same parameter file.
+We use BLUPF90+ here. This software quickly solves mixed model equations and saves the solutions to a file. This program also solves the least squares equations (i.e., normal equations) for fixed effect models. The same parameter file is also used for variance component estimation and genomic prediction.
 
-BLUPF90 needs at least two files: a data file and a parameter file. The data file contains observations and related information (animal ID, age, sex, month, and so on). The parameter file defines the model, the name of the data file, genetic and non-genetic variance components, and optionally the name of the pedigree file. The files should be prepared by a user. We start here with a linear fixed model with one class variable; this is equivalent to one-way ANOVA (with unbalanced data).
+BLUPF90+ needs at least two files: a data file and a parameter file. The data file contains observations and related information (animal ID, age, sex, month, and so on). The parameter file defines the model, the name of the data file, genetic and non-genetic variance components, and, optionally, the names of the pedigree file and genetic-marker file. The files should be prepared by the user. We start here with a linear fixed model with one class variable; this is equivalent to one-way ANOVA (with unbalanced data).
 
 
 One-way ANOVA model
@@ -33,11 +33,11 @@ and the system of generalized least-squares equations is
 $$
 \mathbf{X}'\mathbf{R}^{-1}\mathbf{X}\mathbf{\hat{b}} = \mathbf{X}'\mathbf{R}^{-1}\mathbf{y}
 $$
-where $\mathbf{R} = \mathrm{var}(\mathbf{e}) = \mathrm{var}(\mathbf{y})$. We actually assume $\mathbf{R} = \mathbf{I}\sigma_{e}^{2}$ with a residual variance $\sigma_{e}^{2}$, so the above equations reduce to ordinary normal equations: $\mathbf{X}'\mathbf{X}\mathbf{\hat{b}} = \mathbf{X}'\mathbf{y}$. The purpose of this example is to solve the equations with BLUPF90. The program doesn’t perform any hypothetical tests.
+where $\mathbf{R} = \mathrm{var}(\mathbf{e}) = \mathrm{var}(\mathbf{y})$. We actually assume $\mathbf{R} = \mathbf{I}\sigma_{e}^{2}$ with a residual variance $\sigma_{e}^{2}$, so the above equations reduce to ordinary normal equations: $\mathbf{X}'\mathbf{X}\mathbf{\hat{b}} = \mathbf{X}'\mathbf{y}$. The purpose of this example is to solve the equations with `blupf90+`. The program does not perform any hypothesis tests.
 
 ### Data ###
 
-In this analysis, we need at least two pieces of information: 1) observations and 2) code to distinguish the level of a class. Following table shows an actual data set with 10 observations.
+In this analysis, we need at least two pieces of information: (1) observations and (2) a code to distinguish the levels of a class. The following table shows an actual data set with 10 observations.
 
 Observation     Group
 -----------     -----
@@ -52,11 +52,11 @@ Observation     Group
         8.0        A3
         4.0        A3
 
-The first column represents observations, and the second column has the group code. You can put any positive or negative observations to the data file. You can use any numerical values for observations except for 0. By default, the program treats 0 as a missing code. If you want to use an arbitrary number including 0 as a measurement, see the Remarks section below to correctly handle such a case.
+The first column represents observations, and the second column contains the group code. You can put any positive or negative observations in the data file. You can use any numerical value for an observation except 0. By default, the program treats 0 as a missing code. If you want to use an arbitrary number, including 0, as a measurement, see the Remarks section below for how to handle this case correctly.
 
-In BLUPF90, the user should prepare the data set as a text file in columns separated by spaces, with the same number of columns in every line. If you use other software like R and SAS, you should save the data as a text file. Almost any software can export the data to a text file. Do not forget to replace the symbolic, missing code (like `NA` or `.`) with a numeric value which BLUPF90 treats as missing.
+For BLUPF90 programs, the user should prepare the data set as a text file with columns separated by spaces and the same number of columns on every line. If you use other software, such as R or SAS, you should save the data as a text file. Almost any software can export data to a text file. Do not forget to replace symbolic missing codes (such as `NA` or `.`) with a numeric value that the BLUPF90 family treats as missing.
 
-Here we can write down the data file. You can put any file name. We save the following 7 lines as a file `data0.txt`.
+Here we can write down the data file. You can use any file name. We save the following 10 lines as the file `data0.txt`.
 
 ~~~~~{language=text caption="data0.txt"}
 3.0   1
@@ -71,7 +71,7 @@ Here we can write down the data file. You can put any file name. We save the fol
 4.0   3
 ~~~~~
 
-This file shows the rules in a data file used with BLUPF90. The data is a space-separated format with several columns as supported in much statistical software. No headers are allowed. The file should contain numerical expressions only. We will explain the acceptable data format later.
+This file illustrates the rules for a data file used with the BLUPF90 family. The data are in a space-separated format with several columns, as supported by many statistical software packages. No headers are allowed. The file should contain numerical expressions only. We will explain the acceptable data format later.
 
 ### Parameter file ###
 
@@ -94,10 +94,10 @@ RANDOM_RESIDUAL VALUES
 1.0
 ~~~~~
 
-The parameter file is described as pairs of keyword and value(s). For example, the first line `DATAFILE` is a keyword and the next line `data.txt` is the corresponding value. The value(s) should be placed in the next line to the keyword. The keyword must start from the 1st position in a line (i.e., no leading spaces). The value can have leading spaces at the beginning of a line. The above example is a minimal one. We need at least 7 keywords in every parameter file even some values are empty. Following is a detailed explanation of the above parameter file.
+The parameter file is described using pairs of keywords and values. For example, the first line, `DATAFILE`, is a keyword, and the next line, `data0.txt`, is the corresponding value. The value(s) should be placed on the line following the keyword. The keyword must start in the first position on a line (i.e., with no leading spaces). The value can have leading spaces at the beginning of a line. The above example is a minimal one. We need at least 7 keywords in every parameter file, even when some values are empty. The following is a detailed explanation of the above parameter file.
 
   1. `DATAFILE` = the name of the data file
-     - → `data.txt` in this case
+     - → `data0.txt` in this case
   2. `NUMBER_OF_TRAITS`
      - → `1` for a single-trait model
   3. `NUMBER_OF_EFFECTS` = number of effects except residual
@@ -108,33 +108,33 @@ The parameter file is described as pairs of keyword and value(s). For example, t
      - → There is no weight but empty line must be there.
   6. `EFFECTS:` = description of the model (`2 3 cross`; see below)
      - → `2` for the position of group code [2nd column in the data file]
-     - → `3` for the maximum level [the columns has 1 or 2 or 3; so the maximum is 3]
+     - → `3` for the maximum level [the column contains 1, 2, or 3; so the maximum is 3]
      - → `cross` for the cross-classified effect
   7. `RANDOM_RESIDUAL VALUES` = residual variance $\sigma_e^2$
-     - → `1.0`; this value doesn't affect the results in this case (see the normal equations).
+     - → `1.0`; this value does not affect the results in this case (see the normal equations).
 
-The `EFFECTS:` block describes the model and its style is different from other software. In this case, this block has only 1 line because the model has only 1 effect except for residual. If you have more effects in the model, you can add the description for each effect.
+The `EFFECTS:` block describes the model, and its format differs from that of other software. In this case, this block has only 1 line because the model has only 1 effect in addition to the residual. If you have more effects in the model, you can add a description for each effect.
 
 [^1]: `WEIGHT` does not mean the physical weight (i.e., in kg or pounds). It means the importance that we attach to this particular record. For instance, a weight of 10 may indicate that the measure was taken 10 times. See [wikipedia](https://en.wikipedia.org/wiki/Weight_function).
 
 ### Running a program ###
 
-You can save the data file and parameter file in the same folder (directory) and run BLUPF90. When the program is invoked, it prints a message on the screen and waits for key-in.
+You can save the data file and parameter file in the same folder (directory) and run `blupf90+`. When the program is invoked, it prints a message on the screen and waits for key-in.
 
 ~~~~~{language=output}
  name of parameter file?
 ~~~~~
 
-When you supply the name of parameter file `param1.txt`, the program reads the parameters, builds and solves the equations, and writes the solutions to a file.
+When you supply the name of the parameter file `param1.txt`, the program reads the parameters, builds and solves the equations, and writes the solutions to a file.
 
-What will happen if you give a wrong name of parameter file or your parameter file has erroneous statements? In both cases, an error message is shown and the program stops. Possible results are:
+What will happen if you give the wrong name of a parameter file or if your parameter file contains erroneous statements? In both cases, an error message is shown and the program stops. Possible results are:
 
 - Nonexistent parameter file: The message could be `forrtl: severe (24): end-of-file during read....`.
-- Wrong description in the parameter file: A massage depends on the situation. Modify the parameter file as the message says.
+- Wrong description in the parameter file: The message depends on the situation. Modify the parameter file as the message indicates.
 
 ### Computations ###
 
-After running the program, you can find a file `solutions` after the computations. This is also a text file and it contains the following lines.
+After running the program, you can find a file named `solutions`. This is also a text file, and it contains the following lines.
 
 ~~~~~{language=text caption="solutions"}
 trait/effect level  solution
@@ -143,18 +143,18 @@ trait/effect level  solution
     1   1         3      6.00000000
 ~~~~~
 
-Ignoring the first line as a header, we have 3 lines with 4 columns and the 4th column has the solutions. The first solution ($3.0$) can be interpreted as it is for trait 1, effect 1, and level (group) 1. The second ($5.0$) is for trait 1, effect 1, and level (group) 2. The third ($6.0$) is for trait 1, effect 2, and level (group) 3. With mathematical notations, $\hat{A}_1 = 3.0$, $\hat{A}_2 = 5.0$, and $\hat{A}_3 = 6.0$. The solution is actually within-class average because we employed a 1-way model with an assumption of homogeneous residual variance.
+Ignoring the first line as a header, we have 3 lines with 4 columns, and the 4th column contains the solutions. The first solution ($3.0$) can be interpreted as the solution for trait 1, effect 1, and level (group) 1. The second ($5.0$) is for trait 1, effect 1, and level (group) 2. The third ($6.0$) is for trait 1, effect 1, and level (group) 3. In mathematical notation, $\hat{A}_1 = 3.0$, $\hat{A}_2 = 5.0$, and $\hat{A}_3 = 6.0$. The solution is actually the within-class average because we employed a one-way model with an assumption of homogeneous residual variance.
 
 
 
 Fixed effect model
 ------------------
 
-We consider another fixed model with more effects with the same data set. The model has 1 additional class effect and 1 regression coefficient as
+We consider another fixed-effects model with more effects using the same data set. The model has 1 additional class effect and 1 regression coefficient:
 $$
 y_{ijk} = A_i + S_j + \beta x_{ijk} + e_{ijk}
 $$
-where $y_{ijk}$ is an observation, $A_i$ is a fixed effect, $S_i$ is another fixed effect, $\beta$ is a regression coefficient, $x_{ijk}$ is a covariate, and $e_{ij}$ is the residual effect. The matrix notation and the covariance structure are the same as the previous one. We will use the same data as before but there are some additional columns.
+where $y_{ijk}$ is an observation, $A_i$ is a fixed effect, $S_j$ is another fixed effect, $\beta$ is a regression coefficient, $x_{ijk}$ is a covariate, and $e_{ijk}$ is the residual effect. The matrix notation and covariance structure are the same as in the previous model. We will use the same data as before, but with some additional columns.
 
 Observation      Group1       Group2     $x$
 -----------      ------       ------     ---
@@ -184,7 +184,7 @@ The data file contains 4 columns in this case.
 4.0  3  2  2.0
 ~~~~~
 
-The parameter file is also similar to the previous one but we need extra entries for additional 2 effects.
+The parameter file is also similar to the previous one, but it needs additional entries for the two additional effects.
 
 ~~~~~{language=blupf90 caption="param1.txt"}
 DATAFILE
@@ -205,15 +205,15 @@ RANDOM_RESIDUAL VALUES
 1.0
 ~~~~~
 
-What is the difference? The only difference is in `NUMBER_OF_EFFECTS` and `EFFECTS:`. Because the model has 3 effects (2 for class, 1 for regression), we have changed the value in `NUMBER_OF_EFFECTS`, and `EFFECTS:` needs 3 lines. Note that the 3rd effect is regression and its description is different from the previous 2 cross-classified effects. Following is a detailed explanation.
+What is the difference? The only differences are in `NUMBER_OF_EFFECTS` and `EFFECTS:`. Because the model has 3 effects (2 class effects and 1 regression effect), we have changed the value of `NUMBER_OF_EFFECTS`, and `EFFECTS:` needs 3 lines. Note that the 3rd effect is a regression effect, and its description differs from those of the previous 2 cross-classified effects. The following is a detailed explanation.
 
- - *Effect 1*: `2 3 cross` = group code in the column 2 in data; maximum level 3; cross-classified effect
- - *Effect 2*: `3 2 cross` = group code in the column 3 in data; maximum level 2; cross-classified effect
- - *Effect 3*: `4 1 cov` = covariate in the column 4 in data; number of coefficient 1; regression
+ - *Effect 1*: `2 3 cross` = group code in column 2 of the data; maximum level 3; cross-classified effect
+ - *Effect 2*: `3 2 cross` = group code in column 3 of the data; maximum level 2; cross-classified effect
+ - *Effect 3*: `4 1 cov` = covariate in column 4 of the data; number of coefficients 1; regression
 
-BLUPF90 refer the first effect to *effect 1*, the second to *effect 2*, and so on. The order is kept in the solutions file.
+The BLUPF90 programs refer to the first effect as *effect 1*, the second as *effect 2*, and so on. The order is preserved in the solutions file.
 
-Running the program with the parameter file, you can find the following result.
+When you run the program with the parameter file, you can find the following results.
 
 ~~~~~{language=text caption="solutions"}
 trait/effect level  solution
@@ -225,24 +225,25 @@ trait/effect level  solution
     1   3         1      0.50000000
 ~~~~~
 
-The program provides 6 estimates; top 3 for the first effect, next 2 for the second effect, the bottom 1 for the last effect. With mathematical notations, $\hat{A}_1 = 0.225$, $\hat{A}_2 = 2.225$, and $\hat{A}_3 = 3.225$, $\hat{S}_1 = 2.275$, $\hat{S}_2 = 1.775$, and $\hat{\beta} = 0.500$. This is a single trait model, so the first column is always 1. The second column contains the effect number from the order of items in `EFFECTS:` in the parameter file.
+The program provides 6 estimates: the first 3 are for the first effect, the next 2 are for the second effect, and the last 1 is for the final effect. In mathematical notation, $\hat{A}_1 = 0.225$, $\hat{A}_2 = 2.225$, and $\hat{A}_3 = 3.225$, $\hat{S}_1 = 2.275$, $\hat{S}_2 = 1.775$, and $\hat{\beta} = 0.500$. This is a single-trait model, so the first column is always 1. The second column contains the effect number according to the order of the items in `EFFECTS:` in the parameter file.
 
-Note that this system of equation is not full-rank, so the estimate is one of infinite numbers of solutions. BLUPF90 doesn't support arbitrary constraints to solve the equations. Although the estimates can look different from ones with other software, the contrasts from an estimable function will be consistent.
+Note that this system of equations is not full rank, so the estimates are one of infinitely many possible solutions. The BLUPF90 family does not support arbitrary constraints for solving the equations. Although the estimates may differ from those obtained with other software, the contrasts for any estimable function will be consistent.
 
 
 Options to control the program
 ------------------------------
 
-BLUPF90 and related programs can change the behavior with an option. The option should be written in a parameter file as an additional line at the bottom of the file. There are many options and the official manual explains them.
-Here we just show a typical option line. We use an option which changes the method of solving mixed model equations from the default PCG (preconditioned conjugate gradient) to the direct method using the FSPAK subroutine.
+The behavior of BLUPF90 programs (such as `blupf90+`) can be changed with options. Each program may or may not accept particular options. An option should be written in a parameter file as an additional line at the bottom of the file. If you have multiple options, you can add as many option lines as needed. There are many options, and the official manual explains them.
+
+Here we show a typical option line for BLUPF90+ as a demonstration. We use an option that changes the method of solving the mixed model equations from the default PCG (preconditioned conjugate gradient) to the direct method using the FSPAK subroutine.
 
 ~~~~~{language=blupf90}
 OPTION solv_method FSPAK
 ~~~~~
 
-The option-line starts with the capital `OPTION` followed by a keyword (option name) and additional information (if needed). In the above case, the option name is `solv_method` and additional information is `FSPAK`. Be careful to write an option because BLUPF90 distinguishes capital and small letters in the option-line and fails if the name or information is wrong.
+The option line starts with the uppercase keyword `OPTION`, followed by an option name and additional information, if needed. In the above case, the option name is `solv_method`, and the additional information is `FSPAK`. Be careful when writing an option because the BLUPF90 family distinguishes uppercase and lowercase letters in the option line and will fail if the name or information is incorrect.
 
-The modified parameter file with this option looks like as follows.
+The modified parameter file with this option looks as follows.
 
 ~~~~~{language=blupf90 caption="param1a.txt"}
 DATAFILE
@@ -264,7 +265,7 @@ RANDOM_RESIDUAL VALUES
 OPTION solv_method FSPAK
 ~~~~~
 
-With this parameter file, BLUPF90 successfully works but prints different messages on the screen. The solutions are also different from the previous ones because the equations have no unique solutions.
+Again, this option is effective only for BLUPF90+. With this parameter file, `blupf90+` runs successfully but prints different messages on the screen. The solutions are also different from the previous ones because the equations do not have unique solutions.
 
 ~~~~~{language=text caption="solutions"}
 trait/effect level  solution
@@ -276,13 +277,13 @@ trait/effect level  solution
     1   3         1      0.50000000
 ~~~~~
 
-You can still see the consistency in a linear combination of the solutions. For example, $\hat{A}_1 + \hat{S}_1 + \hat{\beta} = 3.0$ in both cases.
+You can still see the consistency of a linear combination of the solutions. For example, $\hat{A}_1 + \hat{S}_1 + \hat{\beta} = 3.0$ in both cases.
 
 
 Comment lines in parameter file
 -------------------------------
 
-A parameter file can contain comments, which will be ignored by the program. A comment is a small memorandum to keep additional information in a parameter file. A comment starts with the character `#` and the program ignores any characters between `#` and the end of the line. The following example works as the previous parameter file.
+A parameter file can contain comments, which are ignored by typical BLUPF90 programs. A comment is a brief note for keeping additional information in a parameter file. A comment starts with the character `#`, and the program ignores all characters from `#` to the end of the line. The following example works like the previous parameter file.
 
 ~~~~~{language=blupf90 caption="param1b.txt"}
 #
@@ -309,36 +310,36 @@ RANDOM_RESIDUAL VALUES # any values okay
 OPTION solv_method FSPAK
 ~~~~~
 
-This example shows how comments are ignored. You can write comments almost anywhere in a parameter file. There is one exception; you don't write a comment in lines for variance components. If a comment is with the variance component, the program stops with an error.
+This example shows how comments are ignored. You can write comments almost anywhere in a parameter file. There is one exception: comments should not be placed on lines containing variance components. If a comment is placed on the same line as a variance component, the program stops with an error. Also, comments are allowed in the parameter file but not in the data file.
 
-A comment line is a useful feature so we will put comments on a parameter file in the later chapters.
+Because comment lines are useful, we will use them in parameter files in later chapters.
 
 
 Remarks
 -------
 
-In real-life applications, you may have the data file with alphabets or symbols (alpha-numerics). Even when a class variable is an integer value, it may not start from 1 and may end in a huge value (like 2087654512). Before the analysis, you should edit the files to conform to the requirements of the program. RENUMF90 is a data preparation tool and it replaces alphabets or large numbers to sequential numbers starting from 1. Besides limited situations (e.g., simulated data or data renumbered by other means), you should usually use RENUMF90 to prepare and check the files.
+In real-life applications, your data file may contain alphabetic characters or symbols (alphanumeric values). Even when a class variable is an integer, it may not start at 1 or may end at a very large value (such as 2087654512). Before the analysis, you should edit the files to conform to the program's requirements. RENUMF90 is a data preparation tool that replaces alphabetic characters or large numbers with sequential numbers starting from 1. Except in limited situations (e.g., simulated data or data renumbered by other means), you should usually use RENUMF90 to prepare and check the files.
 
-By default, an observation (a trait) with value 0 (or similar numerical expression i.e. 0.0) is recognized as a missing observation. Similarly, an effect level read as 0 is treated as missing information. This means that that effect is ignored for that particular record. For the single-trait model, the missing observation makes little sense, except in rare circumstances like cross-validation or automatic repeated analysis (i.e., dozens of univariate analysis from the same, already recorded, file). Missing effect is also an abnormal assumption. So you should avoid 0 in the data. If your observation has a real 0 record, you can make the program treat this value as a regular observation by adding an `OPTION` statement as follows:
+By default, an observation (a trait) with value 0 (or a similar numerical expression, such as 0.0) is recognized as a missing observation. Similarly, an effect level read as 0 is treated as missing information. This means that the effect is ignored for that particular record. For a single-trait model, a missing observation has little meaning, except in rare circumstances such as cross-validation or automatic repeated analysis (i.e., dozens of univariate analyses from the same, already recorded file). A missing effect is also an unusual assumption. Therefore, you should avoid using 0 in the data. If your observation has a real value of 0, you can make the program treat it as a regular observation by adding an `OPTION` statement as follows:
 
 ~~~~~{language=blupf90}
 OPTION missing -999
 ~~~~~
 
-The missing option switches the missing value recognized in BLUPF90 from `0` to `-999`. The value is treated as an integer. No real values will be accepted.
+The `missing` option changes the missing value recognized in BLUPF90+ from `0` to `-999`. The value is treated as an integer; real values will not be accepted.
 
-How do we put the interaction among effects commonly found in a 2-way ANOVA ($y = A + B + A \times B + e$)? To do this, we should prepare all the effects $A$, $B$, and $A \times B$ in the data file. BLUPF90 does not generate $A \times B$ from the effects $A$ and $B$. Also, BLUPF90 does not support automatic generation of nested effects. All interactions or nested effects should be prepared as class effects in the data file. RENUMF90, a data preparation software, can help to generate such effects. One exception is regressions nested in a class variable, which is supported by BLUPF90; we will mention this model in a context of random regressions.
+How do we include interactions among effects, as commonly found in a 2-way ANOVA ($y = A + B + A \times B + e$)? To do this, we should prepare all the effects $A$, $B$, and $A \times B$ in the data file. BLUPF90 does not generate $A \times B$ from the effects $A$ and $B$. Also, BLUPF90 does not support automatic generation of nested effects. All interactions or nested effects should be prepared as class effects in the data file. The RENUMF90 program, a data preparation tool, can help generate such effects. One exception is regression nested in a class variable, which is supported by the BLUPF90 programs; we will mention this model in the context of random regression.
 
 
 Summary
 -------
 
  - BLUPF90 supports linear mixed models.
- - BLUPF90 needs 2 text files: a data file and a parameter file.
- - BLUPF90 creates equations based on the files, solve the equations, and saves the solutions to a file.
+ - BLUPF90 needs two text files: a data file and a parameter file.
+ - BLUPF90 creates equations based on the files, solves the equations, and saves the solutions to a file.
  - The data file is a space-separated file containing integer or real numbers.
- - Parameter file should be prepared with a specific form.
- - Order of solutions depends on the description of a parameter file.
- - BLUPF90 can change its behavior with options supplied in the bottom of a parameter file.
- - A comment starts with `#` and ends at the end of the line. A comment is totally ignored by a program.
- - Observation or effect 0 means missing. If you really want to use 0 as an observation, change the missing code with the option `missing`.
+ - The parameter file should be prepared in a specific format.
+ - The order of solutions depends on the description in the parameter file.
+ - BLUPF90 can change its behavior with options supplied at the bottom of a parameter file. An option is generally effective only for a specific program.
+ - Comments are allowed only in the parameter file. A comment starts with `#` and ends at the end of the line. A comment is completely ignored by the program.
+ - An observation or effect level of 0 means missing. If you really want to use 0 as an observation, change the missing code with the `missing` option.

@@ -1,6 +1,15 @@
 News
 ====
 
+Version 1.9.0: Updates from version 1.1.0
+-----------------------------------------
+
+- Fully revised and proofread.
+- Added full support for the new set of BLUPF90 programs: BLUPF90+, GIBBSF90+, and the other tools.
+- Updated numerical examples of "the book", written by Mrode and Pocrnic (2023).
+- Revised and added descriptions for clarity and more information.
+- Marked as a pre-release verion; still under revision.
+
 Version 1.1.0: Updates from version 1.0.1
 -----------------------------------------
 

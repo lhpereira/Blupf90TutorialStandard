@@ -8,7 +8,9 @@ TEXSRC = \
     genomic_files.tex \
     genomic_gblup.tex \
     genomic_gwas.tex \
+    genomic_overview.tex \
     genomic_qc.tex \
+    genomic_ssgblup.tex \
     genomic_start.tex \
     genomic_tuning.tex \
     installation_availability.tex \
@@ -27,31 +29,40 @@ TEXSRC = \
     largescale_reliability.tex \
     largescale_reml.tex \
     largescale_start.tex \
-    mrode_c03ex031_animal_model.tex \
-    mrode_c03ex032_sire_model.tex \
-    mrode_c03ex033_reduced_animal_model.tex \
-    mrode_c03ex034_animal_model_with_groups.tex \
-    mrode_c04ex041_repeatability_model.tex \
-    mrode_c04ex042_common_environment.tex \
-    mrode_c05ex051_mt_equal_design.tex \
-    mrode_c05ex052_mt_missing.tex \
-    mrode_c05ex053_mt_unequal_design.tex \
-    mrode_c05ex054_mt_no_covariance.tex \
-    mrode_c07ex071_maternal.tex \
-    mrode_c08ex081_social_interaction.tex \
-    mrode_c09ex091_fixed_regression.tex \
-    mrode_c09ex092_random_regression.tex \
-    mrode_c10ex102_marker_information.tex \
-    mrode_c10ex103_qtl.tex \
+    mrode_c04ex041_animal_model.tex \
+    mrode_c04ex042_sire_model.tex \
+    mrode_c04ex043_reduced_animal_model.tex \
+    mrode_c04ex044_animal_model_with_groups.tex \
+    mrode_c05ex051_repeatability_model.tex \
+    mrode_c05ex052_common_environment.tex \
+    mrode_c06ex061_mt_equal_design.tex \
+    mrode_c06ex062_mt_missing.tex \
+    mrode_c06ex063_mt_unequal_design.tex \
+    mrode_c06ex064_mt_no_covariance.tex \
+    mrode_c07ex071_canonical_transformation.tex \
+    mrode_c07ex072_cholesky_transformation.tex \
+    mrode_c08ex081_maternal.tex \
+    mrode_c08ex082_reduced_maternal.tex \
+    mrode_c09ex091_social_interaction.tex \
+    mrode_c10ex101_fixed_regression.tex \
+    mrode_c10ex102_random_regression.tex \
+    mrode_c11ex1113_mt.tex \
     mrode_c11ex111_fixed_snp.tex \
     mrode_c11ex112_mixed_snp.tex \
     mrode_c11ex113_gblup.tex \
-    mrode_c11ex115_polygenic.tex \
-    mrode_c11ex116_ssgblup.tex \
-    mrode_c12ex121_dominance.tex \
-    mrode_c12ex123_dominance_inverse.tex \
-    mrode_c13ex131_threshold.tex \
-    mrode_c13ex132_threshold_linear.tex \
+    mrode_c11ex114_snp_solutions.tex \
+    mrode_c11ex116_allele_frequency.tex \
+    mrode_c11ex117_polygenic.tex \
+    mrode_c11ex118_haplotype.tex \
+    mrode_c12ex121_ssgblup.tex \
+    mrode_c12ex122_apy.tex \
+    mrode_c13ex131_dominance.tex \
+    mrode_c13ex132_addtive_and_dominance.tex \
+    mrode_c13ex133_genomic_dominance.tex \
+    mrode_c13ex134_genomic_inbreeding.tex \
+    mrode_c13ex135_epistasis.tex \
+    mrode_c15ex151_threshold.tex \
+    mrode_c15ex152_threshold_linear.tex \
     mrode_start.tex \
     quicktour_fixed.tex \
     quicktour_mixed.tex \
@@ -78,7 +89,9 @@ HTMLSRC = \
     genomic_files.html \
     genomic_gblup.html \
     genomic_gwas.html \
+    genomic_overview.html \
     genomic_qc.html \
+    genomic_ssgblup.html \
     genomic_start.html \
     genomic_tuning.html \
     installation_availability.html \
@@ -97,31 +110,40 @@ HTMLSRC = \
     largescale_reliability.html \
     largescale_reml.html \
     largescale_start.html \
-    mrode_c03ex031_animal_model.html \
-    mrode_c03ex032_sire_model.html \
-    mrode_c03ex033_reduced_animal_model.html \
-    mrode_c03ex034_animal_model_with_groups.html \
-    mrode_c04ex041_repeatability_model.html \
-    mrode_c04ex042_common_environment.html \
-    mrode_c05ex051_mt_equal_design.html \
-    mrode_c05ex052_mt_missing.html \
-    mrode_c05ex053_mt_unequal_design.html \
-    mrode_c05ex054_mt_no_covariance.html \
-    mrode_c07ex071_maternal.html \
-    mrode_c08ex081_social_interaction.html \
-    mrode_c09ex091_fixed_regression.html \
-    mrode_c09ex092_random_regression.html \
-    mrode_c10ex102_marker_information.html \
-    mrode_c10ex103_qtl.html \
+    mrode_c04ex041_animal_model.html \
+    mrode_c04ex042_sire_model.html \
+    mrode_c04ex043_reduced_animal_model.html \
+    mrode_c04ex044_animal_model_with_groups.html \
+    mrode_c05ex051_repeatability_model.html \
+    mrode_c05ex052_common_environment.html \
+    mrode_c06ex061_mt_equal_design.html \
+    mrode_c06ex062_mt_missing.html \
+    mrode_c06ex063_mt_unequal_design.html \
+    mrode_c06ex064_mt_no_covariance.html \
+    mrode_c07ex071_canonical_transformation.html \
+    mrode_c07ex072_cholesky_transformation.html \
+    mrode_c08ex081_maternal.html \
+    mrode_c08ex082_reduced_maternal.html \
+    mrode_c09ex091_social_interaction.html \
+    mrode_c10ex101_fixed_regression.html \
+    mrode_c10ex102_random_regression.html \
+    mrode_c11ex1113_mt.html \
     mrode_c11ex111_fixed_snp.html \
     mrode_c11ex112_mixed_snp.html \
     mrode_c11ex113_gblup.html \
-    mrode_c11ex115_polygenic.html \
-    mrode_c11ex116_ssgblup.html \
-    mrode_c12ex121_dominance.html \
-    mrode_c12ex123_dominance_inverse.html \
-    mrode_c13ex131_threshold.html \
-    mrode_c13ex132_threshold_linear.html \
+    mrode_c11ex114_snp_solutions.html \
+    mrode_c11ex116_allele_frequency.html \
+    mrode_c11ex117_polygenic.html \
+    mrode_c11ex118_haplotype.html \
+    mrode_c12ex121_ssgblup.html \
+    mrode_c12ex122_apy.html \
+    mrode_c13ex131_dominance.html \
+    mrode_c13ex132_addtive_and_dominance.html \
+    mrode_c13ex133_genomic_dominance.html \
+    mrode_c13ex134_genomic_inbreeding.html \
+    mrode_c13ex135_epistasis.html \
+    mrode_c15ex151_threshold.html \
+    mrode_c15ex152_threshold_linear.html \
     mrode_start.html \
     quicktour_fixed.html \
     quicktour_mixed.html \

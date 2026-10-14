@@ -3,6 +3,8 @@ Introduction to BLUPF90 suite programs
 
 Written by Yutaka Masuda
 
+Now the tutorial supports BLUPF90+, GIBBSF90+, and new options.
+
 Quick links
 -----------
 
@@ -54,3 +56,8 @@ Where can I get the numerical examples in this tutorials?
 The numerical examples and the files used in the tutorial are available at my Github repository. All the files in the repository are released in the public domain.
 
 - <https://github.com/masuday/data/tree/master/tutorial>
+
+The numerical examples presented in the book by Mrode and Pocrnic (2023) are available in the following GitHub repository.
+
+- <https://github.com/MrodesBook/Examples_BLUPF90>
+

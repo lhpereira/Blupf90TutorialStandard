@@ -1,7 +1,7 @@
 ---
 title: Data preparation with RENUMF90
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -12,13 +12,13 @@ Animal model with pedigree file
 Random effect specification
 ---------------------------
 
-We consider a mixed model with 1 or more random effects. Note that, even adding random effects, the renumbered data file will be the same as those used one for the fixed effect model. Only differences when considering random effects in RENUMF90 are: 1) output parameter file contains statements for random effects and 2) pedigree or related files will be properly processed if needed.
+We consider a mixed model with one or more random effects. Note that, even when random effects are added, the renumbered data file will be the same as the one used for the fixed-effect model. The only differences when considering random effects in RENUMF90 are: (1) the output parameter file contains statements for random effects, and (2) pedigree or related files are processed properly if needed.
 
 First, we reconsider the previous example and assume the second effect ($S_j$) is random.
 $$
 y_{ijk} = A_{i} + S_{j} + \beta x_{ijk} + e_{ijk}
 $$
-The raw data file is the same as those used before but we change the name of the file.
+The raw data file is the same as the one used before, but we change the filename.
 
 ~~~~~{language=text caption="rawdata2.txt"}
  ID006  A  1  1.0  3.0
@@ -33,7 +33,7 @@ The raw data file is the same as those used before but we change the name of the
  ID015  C  2  2.0  4.0
 ~~~~~
 
-Assuming the residual variance $\sigma_{e}^{2} = 2.0$ and the random effect's variance $\sigma_{s}^{2} = 1.0$, the parameter file looks like:
+Assuming that the residual variance is $\sigma_{e}^{2} = 2.0$ and the random-effect variance is $\sigma_{s}^{2} = 1.0$, the parameter file is as follows:
 
 ~~~~~{language=renumf90 caption="renum2.txt"}
 DATAFILE
@@ -58,11 +58,11 @@ EFFECT           # 3rd effect
 4 cov
 ~~~~~
 
-This parameter file is also the same as those used before except we inserted 2 extra keywords and the corresponding values: the keyword `RANDOM` with the value `diagonal` and the keyword `(CO)VARIANCES` with the value 1.0 just after the definition of effect 2. Basically, RENUMF90 treats the effect as random if `RANDOM` places after the effect specification; otherwise, the effect is fixed. [^1]
+This parameter file is also the same as the one used before, except that we inserted two additional keywords and their corresponding values: the keyword `RANDOM` with the value `diagonal` and the keyword `(CO)VARIANCES` with the value 1.0, immediately after the definition of effect 2. Basically, RENUMF90 treats the effect as random if `RANDOM` is placed after the effect specification; otherwise, the effect is fixed. [^1]
 
-[^1]: A tricky feature is to omit `(CO)VARIANCES`. If you do not put this keyword, RENUMF90 implicitly assumes the variance component is 1.0 by default. We highly recommend to use `(CO)VARIANCES` option to avoid the confusion.
+[^1]: One possibility is to omit `(CO)VARIANCES`. If you do not include this keyword, RENUMF90 implicitly assumes that the variance component is 1.0 by default. We highly recommend using the `(CO)VARIANCES` option to avoid confusion.
 
-This produces the data and parameter files equivalent to ones used in the previous chapter. You can confirm the generated files provides the same solutions as before.
+This produces data and parameter files equivalent to those used in the previous chapter. You can confirm that the generated files provide the same solutions as before.
 
 
 Animal model
@@ -70,7 +70,7 @@ Animal model
 
 ### Raw data ###
 
-RENUMF90 can handle an animal model with the same framework using `RANDOM` and other optional keywords to read a raw pedigree file. We can use the same data file as before. We duplicate the data file to another one with a different name.
+RENUMF90 can handle an animal model within the same framework, using `RANDOM` and other optional keywords to read a raw pedigree file. We can use the same data file as before. We duplicate the data file under a different name.
 
 ~~~~~{language=text caption="rawdata3.txt"}
  ID006  A  1  1.0  3.0
@@ -87,7 +87,7 @@ RENUMF90 can handle an animal model with the same framework using `RANDOM` and o
 
 ### Raw pedigree ###
 
-The following is the raw pedigree which is corresponding to the pedigree shown in the previous chapter.
+The following is the raw pedigree corresponding to the pedigree shown in the previous chapter.
 
 ~~~~~{language=text caption="rawpedigree3.txt"}
  ID001      0      0
@@ -107,14 +107,14 @@ The following is the raw pedigree which is corresponding to the pedigree shown i
  ID015  ID011  ID010
 ~~~~~
 
-The animal ID shares in both raw data and raw pedigree files. A raw pedigree with the following format is allowed for RENUMF90.
+Animal IDs are shared by the raw data and raw pedigree files. A raw pedigree with the following format is allowed for RENUMF90.
 
-- It contains at least 3 columns, animal ID, sire ID, and dam ID, separated with 1 or more spaces. A tab is not allowed.
-- Each ID can place any position. For example, animal ID can be in column 4.
+- It contains at least 3 columns—animal ID, sire ID, and dam ID—separated by one or more spaces. A tab is not allowed.
+- Each ID can be in any position. For example, the animal ID can be in column 4.
 - An unknown or missing parent must be `0`. Other expressions (like `00` or `00000` or `NA`) are not allowed as missing, and they will be recognized as real animals.
 - You can also put the date of birth (year of birth) as an additional column. The information should be an integer value.
-- Animals do not have to be ordered either chronologically nor alphabetically. Any random order is allowed.
-- Although an animal appears in the sire or dam column, it is not necessarily in the animal column. Such an animal is assumed to have unknown parents (both sire and dam unknown).
+- Animals do not have to be ordered chronologically or alphabetically. Any order is allowed.
+- Although an animal appears in the sire or dam column, it does not necessarily appear in the animal column. Such an animal is assumed to have unknown parents (both sire and dam unknown).
 
 
 ### Parameter file ###
@@ -123,7 +123,7 @@ We assume a mixed model:
 $$
 y_{ijk} = A_{i} + S_{j} + \beta x_{ijk} + u_{k} + e_{ijk}
 $$
-where $A_{i}$ and $S_{j}$ are fixed effects, $\beta$ is a fixed regression, $u_{k}$ is the additive genetic effect and $e_{ijk}$ is the random residual. The variances are assumed as $\sigma_{e}^2 = 2.0$ and $\sigma_u^2 = 0.5$. We add the statement `EFFECT` to the previous instruction as the additive genetic effect with the `RANDOM` keyword.
+where $A_{i}$ and $S_{j}$ are fixed effects, $\beta$ is a fixed regression coefficient, $u_{k}$ is the additive genetic effect, and $e_{ijk}$ is the random residual. The variances are assumed to be $\sigma_{e}^2 = 2.0$ and $\sigma_u^2 = 0.5$. We add an `EFFECT` statement to the previous instruction to specify the additive genetic effect with the `RANDOM` keyword.
 
 ~~~~~{language=renumf90 caption="renum3.txt"}
 DATAFILE
@@ -158,26 +158,26 @@ We can see two new keywords here.
 
 - `FILE`: the name of the raw pedigree file.
     - `rawpedigree3.txt`
-- `FILE_POS`: the position of IDs in the raw pedigree file; 5 items needed.
+- `FILE_POS`: the positions of IDs in the raw pedigree file; 5 items are needed.
     - 1st item = the position of animal ID (1 for the 1st column)
     - 2nd item = the position of sire ID (2 for the 2nd column)
     - 3rd item = the position of dam ID (3 for the 3rd column)
-    - 4th item = usually 0 (will be explained in the later section)
-    - 5th item = usually 0 (will be explained in the later section)
+    - 4th item = usually 0 (explained later)
+    - 5th item = usually 0 (explained later)
 
-Be careful of the order of keywords for random effects. RENUMF90 only accept the keywords properly ordered in instruction. In this example, the order should be:
+Be careful about the order of keywords for random effects. RENUMF90 only accepts the keywords when they are properly ordered in the instruction file. In this example, the order should be:
 
 1. `RANDOM`
 2. `FILE`
 3. `FILE_POS`
 4. `(CO)VARIANCES`
 
-We have many more keywords related to random effects. The keywords should be ordered to be read by RENUMF90. We will review the proper ordering later.
+There are many more keywords related to random effects. The keywords should be ordered so that RENUMF90 can read them. We will review the proper ordering later.
 
 
 ### Output files ###
 
-After running RENUMF90, you can see some files in the same directory: `renf90.dat`, `renf90.par`, `renf90.tables`, and `renadd04.ped`. The last one is renumbered pedigree. Why 4? This 4 comes from the position of the effect in instruction; the additive genetic effect was defined as the 4th `EFFECT` statement. If your additive genetic effect is declared as the 6th effect, the name of the pedigree file will be `renadd06.ped`.
+After running RENUMF90, you can find several files in the same directory: `renf90.dat`, `renf90.par`, `renf90.tables`, and `renadd04.ped`. The last one is the renumbered pedigree. Why 4? This 4 comes from the position of the effect in the instruction file; the additive genetic effect was defined as the 4th `EFFECT` statement. If your additive genetic effect is declared as the 6th effect, the pedigree file will be named `renadd06.ped`.
 
 The renumbered pedigree file (`renadd04.ped`) contains 10 columns.
 
@@ -199,27 +199,27 @@ The renumbered pedigree file (`renadd04.ped`) contains 10 columns.
 15 0 0 3 0 0 0 0 1 ID003
 ~~~~~
 
-Column 1 is for renumbered animal ID, column 2 for sire ID and column 3 for dam ID. The remaining columns contain additional information. The last (10th) column is the original ID. Many of them are actually ignored in BLUPF90. [^2] The official manual explains the meaning of each column.
+Column 1 contains the renumbered animal ID, column 2 contains the sire ID, and column 3 contains the dam ID. The remaining columns contain additional information. The last (10th) column is the original ID. Many of these columns are ignored by BLUPF90. [^2] The official manual explains the meaning of each column.
 
  1. animal number (from 1)
  2. parent 1 number or unknown parent group number for parent 1
  3. parent 2 number or unknown parent group number for parent 2
  4. 3 minus number of known parents
  5. known or estimated year of birth (0 if not provided)
- 6. number of known parents (parents might be eliminated if not contributing; if animal has genotype 10+number of know parents
+ 6. number of known parents (parents might be eliminated if they do not contribute; if the animal has a genotype, this is 10 + the number of known parents)
  7. number of records
  8. number of progeny (before elimination due to other effects) as parent 1
  9. number of progeny (before elimination due to other effects) as parent 2
-10. original animal id
+10. original animal ID
 
-The conversion table for animal ID is not saved in `renf90.tables`. The correspondence can be found only in the renumbered pedigree file (column 1 and 10).
+The conversion table for animal ID is not saved in `renf90.tables`. The correspondence can be found only in the renumbered pedigree file (columns 1 and 10).
 
 [^2]: The 4th column will be used if you put certain options in the parameter file. We do not explain such options here.
 
 
 ### Test run with the renumbered data ###
 
-You can run BLUPF90 with the generated parameter file and obtain the solutions of the equation. The analysis mimics the previous one in the previous chapter so the results should be identical (without numerical error). You will find the BLUE is the same and the estimated breeding values (BLUP) are also the same but the order of animals are different. The following is a combination of previous ones (left) and the current ones (right).
+You can run BLUPF90 with the generated parameter file and obtain the solutions of the equations. The analysis is the same as the previous one, so the results should be identical (apart from numerical error). You will find that the BLUE and the estimated breeding values (BLUPs) are also the same, but the order of the animals is different. The following combines the previous results (left) and the current results (right).
 
 ~~~~~{language=text}
 1   1         1          0.20259644    1   1         1          0.20259637
@@ -245,21 +245,20 @@ You can run BLUPF90 with the generated parameter file and obtain the solutions o
 1   4        15         -0.25707431    1   4        15          0.03843922
 ~~~~~
 
-This is because of the different order of animals in the pedigree file between 2 datasets. RENUMF90 orders pedigree animals as follows.
+This is because the animals are ordered differently in the pedigree files for the two data sets. RENUMF90 orders pedigree animals as follows.
 
-   1. First, the program assigns smaller numbers to animals with the record(s). The order of animals are unpredictable (that is not following the order found in the data file).
-   2. Then, the program assigns larger numbers to animals found only in pedigree.
+   1. First, the program assigns smaller numbers to animals with records. The order of the animals is unpredictable (that is, it does not follow the order found in the data file).
+   2. Then, the program assigns larger numbers to animals found only in the pedigree.
 
+Note that RENUMF90 does not order the pedigree animals chronologically (that is, from oldest to youngest). No options are available to order the animals chronologically. The above rules result from a simplification of the implementation, but this ordering is useful for fitting the permanent environmental effect in the repeatability model.
 
-Note that RENUMF90 doesn't order the pedigree animals chronologically (that is, from oldest to youngest). No options are available to order the animals chronologically. The above rules are from the simplification of implementation, but it is useful for fitting the permanent environmental effect in the repeatability model.
-
-Usually, you will combine the solutions (estimated breeding values) with the original animal ID. This can be done with several ways for example, Linux (Unix) tools, database management systems, statistical languages like R, even Microsoft Excel.
+Usually, you will combine the solutions (estimated breeding values) with the original animal ID. This can be done in several ways, for example, using Linux (Unix) tools, database management systems, statistical languages such as R, or even Microsoft Excel.
 
 
 More than 1 random effect
 -------------------------
 
-As the last demonstration of RENUMF90 in this section, let us assume that the effect $S_j$ is also random as well as $u_k$ in the above model. The variance components are $\sigma_e^2 = 2.0$, $\sigma_s^2 = 1.0$, and $\sigma_u^2 = 0.5$. A suggested instruction file is as follows.
+As the last demonstration of RENUMF90 in this section, let us assume that the effect $S_j$ is also random, as is $u_k$ in the above model. The variance components are $\sigma_e^2 = 2.0$, $\sigma_s^2 = 1.0$, and $\sigma_u^2 = 0.5$. A suggested instruction file is as follows.
 
 ~~~~~{language=renumf90 caption="renum3a.txt"}
 DATAFILE
@@ -277,7 +276,7 @@ EFFECT             # 1st effect fixed
 EFFECT             # 2nd effect fixed
 3 cross alpha
 RANDOM             ## treated as a random effect
-diagnonal
+diagonal
 (CO)VARIANCES      ## its variance component
 1.0
 EFFECT             # 3rd effect fixed
@@ -294,7 +293,7 @@ FILE_POS           ## animal, sire and dam IDs with two 0s
 0.5
 ~~~~~
 
-This is a combination of the first and second examples in this section. You can easily figure it out how each statement works.
+This is a combination of the first and second examples in this section. You can easily figure out how each statement works.
 
 
 Summary
@@ -302,10 +301,10 @@ Summary
 
 - RENUMF90 treats the effect with the `RANDOM` keyword as a random effect.
 - The `RANDOM` keyword may require other keywords.
-- If a random effect doesn't need the pedigree, just put `RANDOM` and `(CO)VARIANCES` only.
-- If a random effect needs the pedigree, put `RANDOM`, `FILE`, `FILE_POS`, and `(CO)VARIANCES` in this order.
-- A raw pedigree-file should contain at least 3 columns: animal ID, sire ID, and dam ID. The order of columns is arbitrary.
-- The renumbered pedigree-file has a name as `renaddnn.ped` where `nn` is the position of this effect in instruction.
+- If a random effect does not require the pedigree, include only `RANDOM` and `(CO)VARIANCES`.
+- If a random effect requires the pedigree, include `RANDOM`, `FILE`, `FILE_POS`, and `(CO)VARIANCES` in this order.
+- A raw pedigree file should contain at least 3 columns: animal ID, sire ID, and dam ID. The order of the columns is arbitrary.
+- The renumbered pedigree file is named `renaddnn.ped`, where `nn` is the position of this effect in the instruction file.
 - The renumbered pedigree file has 10 columns including the original ID. The renumbered ID will not be in `renf90.tables`.
 - The animals with records have smaller numbers than animals found only in pedigree.
-- RENUMF90 supports more than 1 random effects.
+- RENUMF90 supports more than one random effect.

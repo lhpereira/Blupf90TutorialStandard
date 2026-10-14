@@ -159,9 +159,9 @@
 \begin{document}
 
 \frontmatter
-\title{Introduction to BLUPF90 suite programs\\ Standard Edition (Ver 1.1.0)}
+\title{Introduction to BLUPF90 suite programs\\ Standard Edition (Ver 1.9.0)}
 \author{Yutaka Masuda}
-\date{April 2025}
+\date{August 2026}
 \maketitle
 
 \chapter{Revision History}
@@ -216,31 +216,40 @@
 
 \chapter{Various models}
 \input{mrode_start.tex}
-\input{mrode_c03ex031_animal_model.tex}
-\input{mrode_c03ex032_sire_model.tex}
-\input{mrode_c03ex033_reduced_animal_model.tex}
-\input{mrode_c03ex034_animal_model_with_groups.tex}
-\input{mrode_c04ex041_repeatability_model.tex}
-\input{mrode_c04ex042_common_environment.tex}
-\input{mrode_c05ex051_mt_equal_design.tex}
-\input{mrode_c05ex052_mt_missing.tex}
-\input{mrode_c05ex053_mt_unequal_design.tex}
-\input{mrode_c05ex054_mt_no_covariance.tex}
-\input{mrode_c07ex071_maternal.tex}
-\input{mrode_c08ex081_social_interaction.tex}
-\input{mrode_c09ex091_fixed_regression.tex}
-\input{mrode_c09ex092_random_regression.tex}
-\input{mrode_c10ex102_marker_information.tex}
-\input{mrode_c10ex103_qtl.tex}
+\input{mrode_c04ex041_animal_model.tex}
+\input{mrode_c04ex042_sire_model.tex}
+\input{mrode_c04ex043_reduced_animal_model.tex}
+\input{mrode_c04ex044_animal_model_with_groups.tex}
+\input{mrode_c05ex051_repeatability_model.tex}
+\input{mrode_c05ex052_common_environment.tex}
+\input{mrode_c06ex061_mt_equal_design.tex}
+\input{mrode_c06ex062_mt_missing.tex}
+\input{mrode_c06ex063_mt_unequal_design.tex}
+\input{mrode_c06ex064_mt_no_covariance.tex}
+\input{mrode_c07ex071_canonical_transformation.tex}
+\input{mrode_c07ex072_cholesky_transformation.tex}
+\input{mrode_c08ex081_maternal.tex}
+\input{mrode_c08ex082_reduced_maternal.tex}
+\input{mrode_c09ex091_social_interaction.tex}
+\input{mrode_c10ex101_fixed_regression.tex}
+\input{mrode_c10ex102_random_regression.tex}
 \input{mrode_c11ex111_fixed_snp.tex}
 \input{mrode_c11ex112_mixed_snp.tex}
 \input{mrode_c11ex113_gblup.tex}
-\input{mrode_c11ex115_polygenic.tex}
-\input{mrode_c11ex116_ssgblup.tex}
-\input{mrode_c12ex121_dominance.tex}
-\input{mrode_c12ex123_dominance_inverse.tex}
-\input{mrode_c13ex131_threshold.tex}
-\input{mrode_c13ex132_threshold_linear.tex}
+\input{mrode_c11ex114_snp_solutions.tex}
+\input{mrode_c11ex116_allele_frequency.tex}
+\input{mrode_c11ex117_polygenic.tex}
+\input{mrode_c11ex118_haplotype.tex}
+\input{mrode_c11ex1113_mt.tex}
+\input{mrode_c12ex121_ssgblup.tex}
+\input{mrode_c12ex122_apy.tex}
+\input{mrode_c13ex131_dominance.tex}
+\input{mrode_c13ex132_addtive_and_dominance.tex}
+\input{mrode_c13ex133_genomic_dominance.tex}
+\input{mrode_c13ex134_genomic_inbreeding.tex}
+\input{mrode_c13ex135_epistasis.tex}
+\input{mrode_c15ex151_threshold.tex}
+\input{mrode_c15ex152_threshold_linear.tex}
 
 \chapter{Large-scale genetic evaluation}
 \input{largescale_start.tex}
@@ -251,9 +260,11 @@
 
 \chapter{Practical genomic analysis}
 \input{genomic_start.tex}
+\input{genomic_overview.tex}
 \input{genomic_files.tex}
 \input{genomic_qc.tex}
 \input{genomic_tuning.tex}
+\input{genomic_ssgblup.tex}
 \input{genomic_gblup.tex}
 \input{genomic_gwas.tex}
 

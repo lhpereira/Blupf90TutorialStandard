@@ -1,9 +1,11 @@
 ---
 title: Practical genomic analysis
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
 
-In genomic prediction,  the results are often affected by the quality control of SNP markers and the fine-tuning of the genomic relationship matrix. BLUPF90 programs support plenty of options to stabilize the analysis. Here we will explain the additional features implemented in the programs.
+In genomic prediction, the results are often affected by the quality control of SNP markers and the tuning of the genomic relationship matrix. The BLUPF90 programs support many options for stabilizing the analysis. The genomic fearures in th eprogram are implemented in a computational module.
+
+Here, we explain the features implemented in the genomic module.

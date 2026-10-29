@@ -1,7 +1,7 @@
 ---
 title: Practical genomic analysis
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -9,7 +9,7 @@ tags: [introduction,tutorial]
 Tuning and input/output of relationship matrices
 ================================================
 
-Stability of single-step GBLUP depends on the characteristic of $\mathbf{H}^{-1}$ , which contains $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$. We have several ways to adjust $\mathbf{G}$ and $\mathbf{G}^{-1}$ to obtain reasonable results in the genomic analysis. There are also several options to harmonize between $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$. We will introduce the ideas as well as the options needed.
+In this section, we examine various options for creating and inverting relationship matrices and for saving and loading the matrices.
 
 
 Construction of $\mathbf{G}$
@@ -19,7 +19,7 @@ Construction of $\mathbf{G}$
 OPTION whichfreq x
 ~~~~~
 
-This option defines which type of allele frequency is used to calculate $\mathbf{Z}$. The argument `x` could be 0 = use of the user-supplied file (see below), 1 = fixed value (0.5) and 2 = the current allele frequency calculated from the marker data (default). With the argument 0, the file name is supplied with the following option:
+This option defines which type of allele frequency is used to calculate $\mathbf{Z}$. The argument `x` can be 0 (use the user-supplied file; see below), 1 (use the fixed value 0.5), or 2 (use the current allele frequency calculated from the marker data; default). With argument 0, specify the file name using the following option:
 
 ~~~~~{language=blupf90}
 OPTION FreqFile x
@@ -36,10 +36,10 @@ OPTION AlphaBeta a b
 OPTION GammaDelta c d
 ~~~~~
 
-These options define `a` as $\alpha$, `b` as $\beta$, `c` as $\gamma$, and `d` as $\delta$ used in the blending $\alpha\mathbf{G}+\beta\mathbf{A}_{22}^{-1}+\gamma\mathbf{I}+\delta\mathbf{11}'$. The default values are $\alpha = 0.95$, $\beta = 0.05$, $\gamma = 0$, and $\delta = 0$. We usually use a restriction as $\alpha + \beta = 1$, but the program will not check this restriction.
+These options define `a` as $\alpha$, `b` as $\beta$, `c` as $\gamma$, and `d` as $\delta$ in the blending formula $\alpha\mathbf{G}+\beta\mathbf{A}_{22}+\gamma\mathbf{I}+\delta\mathbf{1}\mathbf{1}'$. The default values are $\alpha = 0.95$, $\beta = 0.05$, $\gamma = 0$, and $\delta = 0$. We usually impose the restriction $\alpha + \beta = 1$, but the program does not check this restriction.
 
 
-The original $\mathbf{G}$ matrix is completely updated (rewritten) by the blended $\mathbf{G}$. After the blending, we cannot retrieve the original elements in non-blended $\mathbf{G}$.
+The original $\mathbf{G}$ matrix is completely replaced by the blended $\mathbf{G}$. After blending, we cannot retrieve the original elements of the unblended $\mathbf{G}$.
 
 
 Tuning
@@ -49,7 +49,7 @@ Tuning
 OPTION tunedG x
 ~~~~~
 
-This option defines the method to tune $\mathbf{G}$ up. The tuning scales $\mathbf{G}$ to $\mathbf{A}_{22}$. This tuning is a separate step from blending. In real population, most genotypes are from the recent generations but the pedigree comes from long generations. The situation would cause the incompatibility between $\mathbf{G}$ and $\mathbf{A}_{22}$ due to different amount of information accounting for changes in allele frequency. The tuning tries to make $\mathbf{G}$ compatible with $\mathbf{A}_{22}$ by applying a single regression equation. See Chen et al. (2011), Vitezica et al. (2011), and Christensen et al. (2012) for details.
+This option defines the method for tuning $\mathbf{G}$. Tuning scales $\mathbf{G}$ to $\mathbf{A}_{22}$ and is a separate step from blending. In a real population, most genotypes are from recent generations, whereas the pedigree may span many generations. This can cause incompatibility between $\mathbf{G}$ and $\mathbf{A}_{22}$ because of differences in the information available and changes in allele frequencies over time. Tuning attempts to make $\mathbf{G}$ compatible with $\mathbf{A}_{22}$ by applying a single regression equation. See Chen et al. (2011), Vitezica et al. (2011), and Christensen et al. (2012) for details.
 
 The possible argument `x` is as follows.
 
@@ -57,13 +57,13 @@ The possible argument `x` is as follows.
 - 1 = $\mathrm{mean}\left(\left[\mathrm{diag}(\mathbf{G})\right]\right) = 1$ and $\mathrm{mean}\left(\left[\mathrm{offdiag}(\mathbf{G})\right]\right) = 0$
 - 2 = $\mathrm{mean}\left(\left[\mathrm{diag}(\mathbf{G})\right]\right) = \mathrm{mean}\left(\left[\mathrm{diag}(\mathbf{A}_{22})\right]\right)$ and $\mathrm{mean}\left(\left[\mathrm{offdiag}(\mathbf{G})\right]\right) = \mathrm{mean}\left(\left[\mathrm{offdiag}(\mathbf{A}_{22})\right]\right)$ (default)
 - 3 = $\mathrm{mean}\left(\mathbf{G}\right) = \mathrm{mean}\left(\mathbf{A}_{22}\right)$
-- 4 = Adjustement with the 1st method described as in Powell et al. (2010) or Vitezica et al. (2011). This is very similar to (2).
+- 4 = Adjustment using the first method described by Powell et al. (2010) and Vitezica et al. (2011). This is very similar to (2).
 
 
 Scaling the inverse matrices
 ----------------------------
 
-Additional scaling may be needed for $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$ to achieve the maximum predictive ability in GEBV for young animals. The scaling factors $\tau$ and $\omega$ are used for this purpose.
+Additional scaling may be needed for $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$ to maximize the predictive ability of GEBVs for young animals. The scaling factors $\tau$ and $\omega$ are used for this purpose.
 $$
 \mathbf{H}^{-1}
 =
@@ -77,29 +77,37 @@ $$
 \right]
 $$
 
-In the ideal situation, $\tau = 1$ and $\omega = 1$. The scaling would solve some issues if there are issues
-including incomplete pedigree and unqualified genotypes.
+In the ideal situation, $\tau = 1$ and $\omega = 1$. Scaling may help address issues such as incomplete pedigrees and unqualified genotypes.
 
 ~~~~~{language=blupf90}
 OPTION TauOmega t w
 ~~~~~
 
-These options define `t` as $\tau$ and `w` as $\omega$ in above equation. The default values are $\tau = 1$ and $\omega = 1$.
+These options define `t` as $\tau$ and `w` as $\omega$ in the equation above. The default values are $\tau = 1$ and $\omega = 1$.
 
-The original inverses ($\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$) are completely replaced (rewritten) with the scaled ones ($\tau\mathbf{G}^{-1}$ and $\omega\mathbf{A}_{22}^{-1}$). After the scaling, we cannot retrieve the non-scaled elements in $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$.
+The original inverses ($\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$) are completely replaced by the scaled ones ($\tau\mathbf{G}^{-1}$ and $\omega\mathbf{A}_{22}^{-1}$). After scaling, we cannot retrieve the unscaled elements of $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$. This behavior can be problematic when you save or load these matrices: the option rescales matrices read from files, even if the matrices have already been rescaled.
+
+Note that this option is an ad hoc remedy for reducing bias and overdispersion in predicted breeding values. It may solve immediate problems in practice, but it may also introduce other problems. The option, particularly $\omega$, was widely used in the past or for small populations. One reason why $\omega$ is needed is incompatibility between $\mathbf{G}^{-1}$ and $\mathbf{A}^{-1}$. Accounting for inbreeding in $\mathbf{A}^{-1}$ may solve this issue. The user should also examine the model and data for potential sources of bias.
+
 
 Output options
 --------------
 
-A relationship matrix and its inverse generated with the genomic module can be saved in a file. By default, the format is binary which the software can efficiently read, but a human cannot easily read. If you really want to save the matrix as text format, the following option is useful.
+### Format
+
+A relationship matrix and its inverse generated by the genomic module can be saved to a file. By default, the format is binary (machine-readable), which the software can read efficiently but humans cannot easily read. If you want to save the matrix in text format, the following option is useful.
 
 ~~~~~{language=blupf90}
 OPTION saveAscii
 ~~~~~
 
-The format is space-separate text. It has 3 columns per line: 1) row number, 2) column number and 3) element value. This text file can be used as a user-supplied relationship matrix in BLUPF90 with the `user_file` keyword. If you need the maximum efficiency, do not use this option --- it will be slow in operation.
+The format is space-separated text. It has three columns per line: (1) row number, (2) column number, and (3) element value. The row and column numbers are aligned with the order in the marker file. For example, the animal that appears in the first line of the marker file has code 1, the animal in the second line has code 2, and so on. These codes are completely unrelated to the codes used in the pedigree file.
 
-The following options are available to output matrices. The options are case-sensitive so be careful to write them.
+This text file can be used as a user-supplied relationship matrix in BLUPF90 with the `user_file` keyword. If you need maximum efficiency, do not use this option. It will slow the operation.
+
+### Basic output options
+
+The following options are available for outputting matrices. The options are case-sensitive, so be careful when entering them.
 
 ~~~~~{language=blupf90}
 OPTION saveA22         # save A22 to a file 'A22'
@@ -109,22 +117,40 @@ OPTION saveG all       # save all intermediate G
 OPTION saveGInverse    # save G-inverse to a file 'Gi'
 ~~~~~
 
-You cannot change the name of the file for each matrix. If you put `OPTION saveG_all`, the program will save all the intermediate status of $\mathbf{G}$:
+You cannot change the file name for each matrix. If you specify `OPTION saveG all`, the program will save all intermediate versions of $\mathbf{G}$:
 
 - `Gini` = Initial matrix that is $\mathbf{G} \leftarrow \mathbf{ZZ}'/k$.
-- `G_Alpha_Beta` = Blended matrix with $\mathbf{A}_{22}$ that is $\mathbf{G} \leftarrow \alpha\mathbf{G} + \beta\mathbf{A}_{22}$.
-- `G_gamma` = Blended matrix with $\mathbf{I}$ that is $\mathbf{G} \leftarrow \mathbf{G} + \gamma\mathbf{I}$.
-- `G_delta` = Blended matrix with $\mathbf{11}'$ that is $\mathbf{G} \leftarrow \mathbf{G} + \delta\mathbf{11}'$.
+- `G_Alpha_Beta` = Blended matrix with $\mathbf{A}_{22}$, that is, $\mathbf{G} \leftarrow \alpha\mathbf{G} + \beta\mathbf{A}_{22}$.
+- `G_gamma` = Blended matrix with $\mathbf{I}$, that is, $\mathbf{G} \leftarrow \mathbf{G} + \gamma\mathbf{I}$.
+- `G_delta` = Blended matrix with $\mathbf{1}\mathbf{1}'$, that is, $\mathbf{G} \leftarrow \mathbf{G} + \delta\mathbf{1}\mathbf{1}'$.
 - `G_suggest` = Tuned matrix.
 - `G` = The final matrix.
 
-We should mention that the options saveGInverse and saveA22Inverse save the scaled matrices with $\tau$ and $\omega$. This would be a serious problem if you read the matrices from the files.
+Note that the options `saveGInverse` and `saveA22Inverse` save the scaled matrices with $\tau$ and $\omega$. This can cause a serious problem if you later read these matrices from the files.
+
+### Additional output options
+
+You may use the following options to save the matrices in text format. They are effective even if `saveAscii` is not specified.
+
+~~~~~{language=blupf90}
+OPTION saveHinv            # save H-inverse to `Hinv.txt`
+OPTION saveAinv            # save A-inverse to `Ainv.txt`
+
+OPTION saveA22Orig         # save A22 to a file 'A22_Orig.txt'
+OPTION saveA22InverseOrig  # save A22-inverse to a file 'A22i_Orig.txt'
+OPTION saveGOrig           # save G to a file 'G_Orig.txt'
+OPTION saveGInverseOrig    # save G-inverse to a file 'Gi_Orig.txt'
+OPTION saveHinvOrig        # save H-inverse to `HinvOrig.txt`
+OPTION saveDiagHOrig       # save diag(H) to `diagH.txt`
+~~~~~
+
+The options with `Orig` take the "original" animal names (before renumbering) from the tenth column of the pedigree file and use them as row and column names in the output text file. These are not the animal codes after renumbering in the pedigree file. Thus, these `Orig` options assume that the pedigree file is compatible with the format prepared by RENUMF90. See the format of the renumbered pedigree file in the chapter on renumbering.
 
 
 Input options
 -------------
 
-The program can read the matrices from files. In this case, the program does not calculate the matrix from the marker file or the pedigree file. If you read an inverse matrix from a file, the program could skip creating the original matrix. By default, the program reads only a binary file; with option `OPTION saveAscii` [^1], the programs read a text file. The following options are available.
+The program can read matrices from files. In this case, it does not calculate the matrix from the marker or pedigree file. If you read an inverse matrix from a file, the program can skip creating the original matrix. By default, the program reads only binary files. However, with the option `OPTION saveAscii` [^1], it can read a text file. The following options are available.
 
 ~~~~~{language=blupf90}
 OPTION readA22 file          # read A22                        [ default : 'A22']
@@ -136,24 +162,23 @@ OPTION readGimA22i file      # read (G-inverse - A22-inverse ) [ default: 'GimA2
 
 [^1]: Yes, use `OPTION saveAscii`, because `OPTION readAscii` does not exist.
 
-If you specify the name of the file, the program reads the file supplied. If you omit the name of the file, the program tries to read the default file shown above. For example, you can use the following option to read $\mathbf{G}^{-1}$ saved in `Gi`.
+If you specify a file name, the program reads the supplied file. If you omit the file name, the program tries to read the default file shown above. For example, you can use the following option to read $\mathbf{G}^{-1}$ saved in `Gi`.
 
 ~~~~~{language=blupf90}
-OPTION readGi
+OPTION readGInverse
 ~~~~~
 
-Or you can supply the name of file like this.
+Alternatively, you can supply the file name as follows.
 
 ~~~~~{language=blupf90}
-OPTION readGi condition1.Gi
+OPTION readGInverse condition1.Gi
 ~~~~~
 
-There is a critical specification to be recognized by a user for the options `readGInverse` and `readA22Inverse`. After reading the matrix, the program scales the matrix with $\tau$ or $\omega$. It means that if you have already scaled the matrix before saving it to a file and you read the matrix from the file, the program scales the matrix again without any warnings or messages. Without knowing this fact, the results would be nonsense.
+The user must understand an important detail about the options `readGInverse` and `readA22Inverse`. After reading the matrix, the program scales it with $\tau$ or $\omega$. Thus, if you have already scaled the matrix before saving it and then read it from the file, the program scales it again without any warning or message. If you are unaware of this behavior, the results may be invalid.
 
 A better practice is as follows.
 
-1. Create and save the relationship matrix without the scaling factor($\tau$ or $\omega$) that is the default
-      values: $\tau = 1$ and $\omega = 1$.
+1. Create and save the relationship matrix without scaling factors ($\tau$ or $\omega$); that is, use the default values $\tau = 1$ and $\omega = 1$.
 2. When reading the file, the scaling factors can be specified.
 
-This strategy is really important to perform the analysis many times with different $\tau$ and $\omega$ parameters.
+This strategy is important when performing the analysis multiple times with different $\tau$ and $\omega$ values.

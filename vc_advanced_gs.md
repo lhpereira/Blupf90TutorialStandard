@@ -1,7 +1,7 @@
 ---
 title: Variance component estimation
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -12,16 +12,16 @@ Advanced features in Gibbs sampling programs
 Heterogeneous residual variances
 --------------------------------
 
-GIBBS3F90 supports heterogeneous residual variances defined by a class. Here we will demonstrate an analysis with the heterogeneity in residual variance.
+GIBBSF90+ supports heterogeneous residual variances defined by class. Here, we demonstrate an analysis with heterogeneous residual variances.
 
 ### Files ###
 
 We use the same data and pedigree file as before.
 
-- [`simdata2.txt`](https://github.com/Masuday/data/blob/master/tutorial/simdata2.txt) : data file
-- [`simped2.txt`](https://github.com/Masuday/data/blob/master/tutorial/simped2.txt) : pedigree file
+- [`simdata2.txt`](https://github.com/masuday/data/blob/master/tutorial/examples/variance_components/adv_gibbs/simdata2.txt) : data file
+- [`simped2.txt`](https://github.com/masuday/data/blob/master/tutorial/examples/variance_components/adv_gibbs/simped2.txt) : pedigree file
 
-The pedigree file contains three columns: animal, sire, and dam. The data file has 12 columns as described below.
+The pedigree file contains three columns: animal, sire, and dam. The data file has 14 columns, as described below.
 
 Column Item          type      description
 ------ ---------     -------   ----------------------------------
@@ -40,7 +40,7 @@ Column Item          type      description
 13     Covariate     real      Not used
 14     Class         integer   Heterogeneous residual class
 
-The 14th column contains the heterogeneous-residual-variance class (3 levels) which is used in this section.
+The 14th column contains the heterogeneous-residual-variance class with 3 levels, which is used in this section.
 
 The parameter file has one option to define the heterogeneous residual class.
 
@@ -73,61 +73,65 @@ simped2.txt
 OPTION hetres_int 14 3
 ~~~~~
 
-The option has 2 arguments.
+The option has two arguments.
 
-- `OPTION hetres_int` = defines the heterogeneous residual class with two values: 1) the position of the class in the data file and 2) the maximum level in the class.
+- `OPTION hetres_int` = defines the heterogeneous residual class with two values: 1) the position of the class in the data file and 2) the maximum level of the class.
 
 In this case, we specify that the 14th column has 3 levels.
 
-With 20,000 samples (saved each 10 samples) with 10,000 burn-in, the following results can be found.
+Using 20,000 samples, saving every 10th sample, and discarding 10,000 samples as burn-in, we obtain the following results.
 
 ~~~~~{language=output}
  ave G
    39.845
  SD G
-	3.9917
+   3.9917
  ave R
-	72.313
+   72.313
  SD R
-	3.9497
+   3.9497
  ave R
    78.248
  SD R
    4.4558
  ave R
-  80.646
+   80.646
  SD R
    4.3320
 ~~~~~
 
-There are 3 `ave_R` (and `SD_R`) blocks. The first one corresponds to the variance in heterogeneous level 1, the second line for level 2 and so on. Compare the above estimates to the results from AIREMLF90 shown in the previous section.
+There are 3 `ave_R` (and `SD_R`) blocks. The first corresponds to the variance for heterogeneous level 1, the second to level 2, and so on. Compare the above estimates with the results from BLUPF90+ shown in the previous section.
 
 
 Restart the sampling
 --------------------
 
-After the sampling, you would find more samples are needed. The Gibbs sampling programs support to restart the sampling from the end point of the previous run. Any Gibbs samplers in recent BLUPF90 programs support this feature.
+After sampling, you may find that more samples are needed. GIBBSF90+ supports restarting the sampling from the endpoint of the previous run.
 
-When the Gibbs sampler finishes sampling, 4 files will be created. To continue the sampling, all the files are required.
+When GIBBSF90+ finishes sampling, four files are created. All of these files are required to continue sampling.
 
 - `binary_final_solutions` = Posterior means and SDs for location parameters
 - `last_solutions` = The last samples for location parameters
 - `fort.99` = Values needed for DIC
 - `gibbs_samples` = Sampled variance components
 
-If you want to restart the sampling, you have to add an option to the parameter file. It needs the number of samples drawn in the previous run. If you had 10000 samples, the option should be
+If you want to restart sampling, you must add an option to the parameter file. This option requires the number of samples drawn in the previous run. If you had 10,000 samples, the option should be
 
 ~~~~~{language=blupf90}
 OPTION cont 10000
 ~~~~~
 
-where 10000 is the number of samples obtained previously. Run the Gibbs sampler with a parameter file with the above option, and the program restarts the sampling (from 10001 in the example).
+where 10000 is the number of samples obtained previously. Run the Gibbs sampler with a parameter file containing the above option, and the program will restart sampling from 10001 in this example. GIBBSF90+ will ask you for the number of samples, burn-in, and interval; it is recommended that you enter the following values.
+
+- The number of samples: the additional samples you want to generate in this run.
+- The number of burn-in samples: the number you entered in the previous run.
+- Interval: the number you entered in the previous run.
 
 
 Extraction of solutions from binary final solutions
 ---------------------------------------------------
 
-The file `binary_final_solutions` contains the posterior mean of a location parameter (that is a solution of "fixed" or "random" effect). This file is saved as a non-text format. The following Fortran program can extract the solutions and print them to a file `final_solutions.txt`. You can compile the program using a Fortran compiler (like GFortran) and run it in a directory where the binary final solutions are. The output format is equivalent to BLUPF90 with `OPTION sol_se`.
+The file `binary_final_solutions` contains posterior means for location parameters (that is, solutions for fixed or random effects). This file is saved in a non-text format. The following Fortran program can extract the solutions and print them to a file `final_solutions.txt`. You can compile the program using a Fortran compiler such as gfortran and run it in a directory containing the binary final solutions. The output format is equivalent to that of BLUPF90+ with `OPTION sol se`.
 
 ~~~~~{language=Fortran caption="\url{binsol_to_textsol.f90}"}
 program binsol_to_textsol
@@ -152,18 +156,18 @@ end program binsol_to_textsol
 Output of POSTGIBBSF90
 ----------------------
 
-The POSTGIBBSF90 program shows many diagnoses for the Gibbs samples. Here we just show the basic ideas for the information.
+The POSTGIBBSF90 program provides many diagnostics for the Gibbs samples. Here, we give a brief description of the information provided.
 
-- `MCE` = Monte Carlo error, corresponding to the ''standard error'' of the posterior mean of a parameter ($\hat{\mu}-\mu$).
+- `MCE` = Monte Carlo error, corresponding to the "standard error" of the posterior mean of a parameter ($\hat{\mu}-\mu$).
 - `Mean` = Posterior mean of a parameter.
-- `HPD` = High probability density within 95%, close idea to ''95% confidence interval'' in frequentist approach.
-- `Effective sample size` = Number of samples after deducting auto-correlation among samples.
+- `HPD` = Highest posterior density interval at 95%, similar to a "95% confidence interval" in the frequentist approach.
+- `Effective sample size` = Number of samples after accounting for autocorrelation among samples.
 - `Median` = Posterior median of a parameter.
-- `Mode` = Posterior mode of a parameter; just an approximation.
-- `Independent chain size`
+- `Mode` = Posterior mode of a parameter; this is only an approximation.
+- `Independent chain size` = Effective number of independent samples.
 - `PSD` = Posterior standard deviation of a parameter.
-- `Mean` = the same as those used above.
-- `PSD Interval (95%)` = Lower and upper bounds of Mean $\pm$ 1.96PSD.
-- Geweke diagnostic = Convergence diagnosis; could be converged if this is $< 1.0$ (according to the official manual, this is almost useless because this is $< 1.0$ in almost all cases).
-- `Autocorrelations` = Lag-correlations with lag 1, 10 and 50; calculated for the saved samples.
-- `Independent # batches` = The effective number of blocks after deducting the auto-correlation among samples.
+- `Mean` = the same as the mean described above.
+- `PSD Interval (95%)` = Lower and upper bounds of $\operatorname{Mean} \pm 1.96\,\operatorname{PSD}$.
+- Geweke diagnostic = Convergence diagnostic; values below $1.0$ may indicate convergence (according to the official manual, this diagnostic is almost useless because it is below $1.0$ in almost all cases).
+- `Autocorrelations` = Lag correlations at lags 1, 10, and 50, calculated for the saved samples.
+- `Independent # batches` = The effective number of blocks after accounting for autocorrelation among samples.

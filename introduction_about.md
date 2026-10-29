@@ -1,7 +1,7 @@
 ---
 title: Introduction
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -12,18 +12,36 @@ About this tutorial
 General information
 -------------------
 
-This document explains how to describe a model in a parameter file used with the BLUPF90 family of programs, how to prepare data and pedigree files, and how to perform genomic analyses with the programs. This tutorial assumes that the reader has sufficient knowledge of linear mixed models and data manipulation techniques on a computer. Experience with similar software will also be helpful for understanding the contents.
+### Purpose
 
-Features of the BLUPF90 program are introduced in an introductory style. In particular, the first section of each chapter presents essential features using a very simple example. Later sections introduce new concepts through more practical examples. We recommend that readers do not skip any sections, even if they seem too elementary.
+This document explains how to describe a model in a parameter file used with the BLUPF90 family of programs, how to prepare data and pedigree files, and how to perform genomic analyses with the programs. This tutorial assumes that the reader has sufficient knowledge of linear mixed models and data-manipulation techniques. Experience with similar software will also be helpful for understanding the content.
 
-This tutorial complements the official manual and wiki pages. Because the official manual serves more as a reference, it presents each topic concisely. For advanced topics or technical tricks, please refer to the manual. Conversely, if you find that something is missing in the manual, this tutorial may help you understand the background. If you have a question that is not addressed in the manual, the wiki, or this tutorial, please ask someone in the Yahoo Group (`https://groups.yahoo.com/neo/groups/blupf90/info`). You may find answers in the historical discussion logs of the forum.
+The features of the BLUPF90 programs are introduced in an introductory style. In particular, the first section of each chapter presents essential features using a very simple example. Later sections introduce new concepts through more practical examples. We recommend that readers do not skip any sections, even if they seem too elementary.
+
+This tutorial complements the official manual and wiki pages. Because the official manual serves primarily as a reference, it presents each topic concisely. For advanced topics or technical tricks, please refer to the manual. Conversely, if you find that something is missing in the manual, this tutorial may help you understand the background. If you have a question that is not addressed in the manual, the wiki, or this tutorial, please ask in the Yahoo Group (`https://groups.yahoo.com/neo/groups/blupf90/info`). You may find answers in the historical discussion logs of the forum.
+
+### About the author
+
+The original author is Yutaka Masuda. The initial version of this tutorial was written while the author was working as a research scientist in the Animal Breeding and Genetics group at the University of Georgia (UGA). The author modified the source code of BLUPF90 and incorporated new computational ideas into the programs at UGA. Even after leaving that position, the author occasionally updated this tutorial.
+
+The current version of this tutorial (version 1.9.0 or later) is now the author's personal project and is unrelated to his current affiliation or the UGA group. The new descriptions introduced in this version are based on publicly available information and the author's own research on the BLUPF90 programs. This tutorial is not an official document published by UGA. However, the UGA team is aware that the original author continues to maintain and update the tutorial. The author believes that it is still useful and mostly correct in its descriptions of the BLUPF90 family of programs. In addition, this tutorial uses "we" or "us," even though the author is no longer part of the team. Please disregard this use of the pronoun; it is retained for historical reasons.
+
+<!--
+About this book
+---------------
+
+This book demonstrate how to prepare data and how to describe the model which you want to fit.
+We will show actual files for numerical examples then explain what we should do and of what we should be careful, instead of giving a comprehensive description of file structures in detail.
+The first chapter ("Quick Tour") walk though basic models to demonstrate the fundamental usage of BLUPF90+ in addition to several important tricks and causions on the program.
+We encourage all the readers take a look at the Quick Tour.
+-->
 
 Examples in each section
 ------------------------
 
 ### Example data
 
-In each section, I will provide various examples for the reader. The files are available at the author's GitHub repository (`https://github.com/masuday/data`). Examples in this tutorial are enclosed in a frame, as shown below.
+In each section, I provide various examples for the reader. The files are available in the author's GitHub repository (`https://github.com/masuday/data`). Examples in this tutorial are enclosed in a frame, as shown below.
 
 ~~~~~{language=text caption="example.txt"}
 1   1   2.5
@@ -106,11 +124,13 @@ The following disclaimer is based on the MIT License, although this tutorial is 
 
 I wrote this documentation in Markdown using Pandoc extensions. The PDF file is generated using Pandoc, so there may be typesetting or layout issues.
 
+<!--
 TODO
 ----
 
 These changes can be made in the next edition.
 
-- Fully revise the descriptions to support the new programs `blupf90+` and `gibbsf90+`.
-- Fully revise the chapters related to Dr. Mrode's textbook. The textbook has been updated (now in its 4th edition, "Linear Models for the Prediction of the Genetic Merit of Animals"), and a new author, Ivan Pocrnić, has joined. The numerical examples are now freely available online, and the revised chapters will make use of these materials.
-- Add additional explanations on the usage of other programs, such as `idsolf90`.
+- Fully revise the descriptions to support the new programs `blupf90+` and `gibbsf90+`. [Done]
+- Fully revise the chapters related to Dr. Mrode's textbook. The textbook has been updated (now in its 4th edition, "Linear Models for the Prediction of the Genetic Merit of Animals"), and a new author, Ivan Pocrnić, has joined. The numerical examples are now freely available online, and the revised chapters will make use of these materials. [Done]
+- Add additional explanations on the usage of other programs, such as `idsolf90`. [Partially done]
+-->

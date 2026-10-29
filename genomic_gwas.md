@@ -1,7 +1,7 @@
 ---
 title: Practical genomic analysis
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -9,24 +9,22 @@ tags: [introduction,tutorial]
 GWAS using the ssGBLUP framework
 ================================
 
-The single-step GBLUP methodology has been extended to be capable of genome-wide association study (GWAS). This is an iterative procedure with two steps: 1) prediction of GEBV with ssGBLUP and 2) prediction of SNP marker effects based on the GEBV. Here we call this method ssGWAS. The detailed algorithm was described by Wang et al. (2012).
+The single-step GBLUP methodology has been extended to support genome-wide association studies (GWAS) as a post-mixed-model analysis. This is an iterative procedure with two steps: (1) prediction of GEBVs with ssGBLUP and (2) prediction of SNP effects based on the GEBVs. Here, we call this method ssGWAS. Wang et al. (2012) described the detailed algorithm, and POSTGSF90 implements this method along with additional procedures.
 
 Algorithm
 ---------
 
-To describe the algorithm of ssGWAS, we use the notation made by Wang et al. (2012). The notation may be different from the ones used in the previous chapters. Do not be confused with the same symbols as before.
+To describe the ssGWAS algorithm, we use the notation from Wang et al. (2012). The notation may differ from that used in previous chapters. Do not confuse these symbols with the symbols used earlier.
 
-We assume $\mathbf{a}$ is a vector for breeding values for genotyped animals and $\mathbf{u}$ is a vector for SNP
-marker effects. One is related to another with the following equation.
+We assume that $\mathbf{a}$ is a vector of breeding values for genotyped animals and that $\mathbf{u}$ is a vector of SNP marker effects. They are related by the following equation.
 $$
 \mathbf{a}=\mathbf{Zu}
 $$
-The variances of them can be written as
+Their variances can be written as
 $$
 \mathrm{var}(\mathbf{a}) = \mathbf{G}\sigma_a^2 \quad\text{and}\quad \mathrm{var}(\mathbf{Zu}) = \mathbf{ZDZ}'\sigma_u^2
 $$
-where $\mathbf{D}$ is a diagonal matrix of weights accounting for variances of SNP markers. This matrix is
-usually assumed to be $\mathbf{I}$ in the regular ssGBLUP. Above 2 variances are identical, so we can derive
+where $\mathbf{D}$ is a diagonal matrix of weights accounting for the variances of SNP markers. This matrix is usually assumed to be $\mathbf{I}$ in regular ssGBLUP. The two variances above are identical, so we can derive
 $$
 \mathrm{var}(\mathbf{a}) = \mathrm{var}(\mathbf{Zu}) = \mathbf{G}\sigma_a^2 = \mathbf{ZDZ}'\sigma_u^2
 $$
@@ -38,7 +36,7 @@ where $\lambda=\sigma_u^2/\sigma_a^2$. According to the definition of $\mathbf{G
 $$
 \lambda=\frac{\sigma_u^2}{\sigma_a^2}=\frac{1}{2\sum_j p_j(1-p_j)}.
 $$
-The prediction of breeding values $\hat{\mathbf{a}}$ is calculated with ssGBLUP. The prediction of SNP effects $\hat{\mathbf{u}}$ is also calculated with the best prediction.
+The prediction of breeding values, $\hat{\mathbf{a}}$, is calculated with ssGBLUP. The SNP effects, $\hat{\mathbf{u}}$, are also predicted using best prediction.
 $$
 \begin{aligned}
 \hat{\mathbf{u}} &= \mathrm{cov}(\mathbf{u},\mathbf{a}')\left[\mathrm{var}(\mathbf{a})\right]^{-1}\hat{\mathbf{a}}\\
@@ -46,41 +44,39 @@ $$
  &=	\mathbf{DZ}'(\mathbf{ZDZ}')^{-1}\hat{\mathbf{a}}
 \end{aligned}
 $$
-With the prediction of an SNP effect, we can give weights to markers based on SNP solutions. The current default weight is as
-in Wang et al. (2012):
+Using the predicted SNP effects, we can assign weights to markers. The current default weight is defined as in Wang et al. (2012):
 
 $$
 w_i = 2 p_i q_i \hat{u}_i^2.
 $$
 
-This may be used as a weight in $\mathbf{D}=\mathrm{diag}(w_i)$ after its scaling (see Wang et al., 2012). We restart the whole process with this new $\mathbf{D}$. We can repeat the procedures until reasonable results are obtained. However, this weighting scheme is not the most accurate and leads to unstable iterates. A well-tested method for weights is VanRaden's "nonlinearA" (2008), which likely becomes the default.
+This may be used as a weight in $\mathbf{D}=\mathrm{diag}(w_i)$ after appropriate scaling (see Wang et al. 2012). We restart the entire process with this new $\mathbf{D}$ and can repeat the procedure until reasonable results are obtained. However, this weighting scheme is not the most accurate and can lead to unstable iterations. A well-tested weighting method is VanRaden's "nonlinearA" (2008), which is likely to become the default.
 $$
 w_i = 1.125^{ \frac{|\hat{u}_i|}{\sqrt{var\hat{u}}} -2}
 $$
 
 
-The SNP effects can be used as the indirect prediction of GEBV based on $\mathbf{a} = \mathbf{Zu}$. At the end of
-this section, we will demonstrate this approach.
+The SNP effects can be used to obtain an indirect prediction of GEBVs based on $\mathbf{a} = \mathbf{Zu}$. At the end of this section, we demonstrate this approach.
 
 Programs
 --------
 
 We will use several programs to perform ssGWAS.
 
-   1. RENUMF90: general preparation of data set.
+   1. RENUMF90: general preparation of the data set.
    2. PREGSF90: quality control and creation of cleaned genotypes.
-   3. BLUPF90: prediction of $\mathbf{a}$ with a weighted $\mathbf{G}$.
+   3. BLUPF90+: prediction of $\mathbf{a}$ with a weighted $\mathbf{G}$.
    4. POSTGSF90: prediction of $\mathbf{u}$ and a new weight $\mathbf{D}$.
-   5. PREDF90 (Optional): computation of GEBV based on the predicted SNP effects and genotypes
+   5. PREDF90 (optional): computation of GEBVs based on the predicted SNP effects and genotypes.
 
-The first 2 programs are needed only once in the very first step. If your data is well prepared, you just run BLUPF90 and POSTGSF90 repeatedly. In this case, it is easier to understand for a user to directly use BLUPF90 to create $\mathbf{G}$ and calculate the solutions of GEBV in the same program.
+The first two programs are needed only once, during the initial preparation. If your data are well prepared, you only need to run BLUPF90+ and POSTGSF90 repeatedly. In this case, it may be easier to use BLUPF90+ directly to create $\mathbf{G}$ and calculate the GEBV solutions in the same program.
 
 Numerical example
 -----------------
 
 ### Files ###
 
-We will use the similar numerical-examples used in the summer course at the UGA in 2012. I made some corrections on the files. The modified package is available at the author's repository.
+We will use numerical examples similar to those used in a summer course at UGA in 2012. I made some corrections to the files. The modified package is available in the author's repository.
 
    - `lab_gwas_mod2019.zip` at <https://github.com/masuday/data/blob/master/tutorial/examples/genomic_analysis/>
 
@@ -93,23 +89,23 @@ Download the zip package and extract it to your computer. It has several files a
 - `w` = the default weight file
 - `renum.par` = instruction file for RENUMF90
 
-The package also has two Bash scripts to automate the process in renumbering and ssGWAS. I do not explain how it works -- you can try the following scripts after you finish reading all the content in the following sections.
+The package also has two Bash scripts to automate renumbering and ssGWAS. I do not explain how they work—you can try the scripts after reading the following sections.
 
 - `run_renum.sh` = for renumbering, and for generating the parameter files
 - `run_ssgwas.sh` = for iterative ssGWAS with BLUPF90 and POSTGSF90
 
-The files have been created on Linux (or macOS), and some Windows editors may not show the content correctly because of the "return" code. You can see some more files in the directory, but such files will not be used in this section. We will start with RENUMF90 to prepare the data set.
+The files were created on Linux (or macOS), and some Windows editors may not display their content correctly because of the line-ending format. You may see additional files in the directory, but they will not be used in this section. We will start with RENUMF90 to prepare the data set.
 
 Preparation
 -----------
 
-First, we run RENUMF90 to generate the required files. After renumbering, we can see `renf90.par`, a template parameter file. We make 2 copies of this template; one is for BLUPF90 and another one is for POSTGSF90. Here, we use `param_ssgwas1a.txt` as the parameter file for BLUPF90 and `param_ssgwas1b.txt` for POSTGSF90. The parameter files are availabe at the author's Github repository: <https://github.com/masuday/data/tree/master/tutorial>.
+First, we run RENUMF90 to generate the required files. After renumbering, we can see `renf90.par`, a template parameter file. We make two copies of this template: one for BLUPF90+ and one for POSTGSF90. Here, we use `param_ssgwas1a.txt` as the parameter file for BLUPF90+ and `param_ssgwas1b.txt` for POSTGSF90. The parameter files are available in the author's GitHub repository: <https://github.com/masuday/data/tree/master/tutorial>.
 
-BLUPF90 will generate $\mathbf{G}$ with weights, supplied as a weight file (see the previous section). The zip package contains a weight file (`w`), and the option in the parameter file refers to the weight file. Following is the whole parameter file for BLUPF90.
+BLUPF90+ will generate $\mathbf{G}$ using weights supplied in a weight file (see the previous section). The ZIP package contains a weight file (`w`), and the option in the parameter file refers to this file. The complete parameter file for BLUPF90+ is as follows.
 
 ~~~~~{language=blupf90 caption="param_ssgwas1a.txt"}
 #
-# This is for BLUPF90
+# This is for BLUPF90+
 #
 DATAFILE
 renf90.dat
@@ -139,7 +135,7 @@ OPTION saveGInverse
 OPTION weightedG w
 ~~~~~
 
-POSTGSF90 needs to read $\mathbf{G}^{-1}$ generated with BLUPF90. It also needs a chromosome map file because the program will predict each SNP effect. The following is the complete parameter file for POSTGSF90.
+POSTGSF90 needs to read $\mathbf{G}^{-1}$ generated by BLUPF90+. It also needs a chromosome map file because the program predicts each SNP effect. The following is the complete parameter file for POSTGSF90.
 
 ~~~~~{language=blupf90 caption="param_ssgwas1b.txt"}
 #
@@ -176,20 +172,20 @@ OPTION chrinfo chrmap.txt
 
 ### Iterative run and Manhattan plot ###
 
-First, we run BLUPF90 with the parameter file `param_ssgwas1a.txt` following by running POSTGSF90 with the different parameter file `param_ssgwas1b.txt`. POSTGSF90 creates several files.
+First, we run BLUPF90 with the parameter file `param_ssgwas1a.txt`, followed by POSTGSF90 with the different parameter file `param_ssgwas1b.txt`. POSTGSF90 creates several files.
 
-- `snp_sol` = Solution for SNP markers (that is $\mathbf{u}$). It has 7 columns.
+- `snp_sol` = Solutions for SNP markers (that is, $\mathbf{u}$). It has seven columns.
 
      1. Trait
      2. Effect
      3. SNP number
      4. Chromosome
      5. Position
-     6. SNP solution ($\hat{u}_i$) . From this column you can compute weights yourself.
+     6. SNP solution ($\hat{u}_i$). From this column, you can compute weights yourself.
      7. Weight ($d_i$) (see the official manual for what is the default method to get this value)
 
 
-- `chrsnp` = Used in the Manhattan plot. It has 6 columns.
+- `chrsnp` = Used in the Manhattan plot. It has six columns.
 
      1. Trait
      2. Effect
@@ -218,13 +214,13 @@ The option `OPTION snp_effect_dgv` will create this file.
 - `Sft1e2.gnuplot` and `Sft1e2.R` = Scripts to draw Manhattan plots with Gnuplot and R.
         Each script reads `chrsnp`.
 
-What we need in the next round is the 7th column in `snp_sol`. This column should be extracted and saved in the file `w` (this file is updated with new values). Once `w` is updated, rerun BLUPF90 and POSTGSF90. Repeat the process enough times. In this example, we just repeat 3 times.
+For the next round, we need the seventh column in `snp_sol`. This column should be extracted and saved in the file `w`, which is updated with the new values. Once `w` is updated, rerun BLUPF90+ and POSTGSF90. Repeat the process as needed. In this example, we repeat it three times.
 
-This iterative process can be automated using a script. In Linux and macOS X, a bash shell script is common to use. In Windows, a traditional batch-file is useful but some free software is needed to extract the 7th column of the file. We do not explain such techniques here. You can see bash scripts in the same directory as the data files in the zip package. The scripts will tell you how to run the programs repeatedly.
+This iterative process can be automated using a script. On Linux and macOS, Bash shell scripts are commonly used. On Windows, a traditional batch file is useful, but additional software may be needed to extract the seventh column of the file. We do not explain these techniques here. You can find Bash scripts in the same directory as the data files in the ZIP package. The scripts show you how to run the programs repeatedly.
 
 After 3 rounds, we can draw the Manhattan plot with the script. Using R, you will see the following figure. According to this graph, there is a large SNP effect on chromosome 1.
 
-We arbitrarily decide to repeat the process 3 times here. Although 2 or 3 iterations can be good enough, the optimal number of iterations for prediction should be different by data. In some cases, only the first round (no iterations) may produce the best result. Please find a suitable method for your data by yourself.
+Here, we arbitrarily repeat the process three times. Although two or three iterations may be sufficient, the optimal number of iterations for prediction depends on the data. In some cases, only the first round (no iterations) may produce the best result. Find a suitable procedure for your data.
 
 ### Indirect prediction of GEBV based on SNP effects ###
 
@@ -234,13 +230,13 @@ Once you find the SNP effects, another program PREDF90 can calculate indirect GE
  name of genotype file?
 ~~~~~
 
-Different from other software, it needs the name of the marker file. Type the name of genotype file in here. The program immediately calculates the indirect GEBV for genotyped animals.
+Unlike other programs, it requires the name of the marker file. Type the name of the genotype file here. The program immediately calculates the indirect GEBVs for genotyped animals.
 
-PREDF90 creates a file of SNP predictions. It has 3 columns.
+PREDF90 creates a file of SNP predictions. It has three columns.
 
    1. Animal ID
    2. Call rate
    3. Indirect prediction of GEBV (based on $\mathbf{\hat{a}} = \mathbf{Z\hat{u}}$).
 
 
-In other words, the prediction for an animal is the sum, according to its genotypes, of the estimated SNP effects, as estimated in the overall ssGBLUP analyses. This approach is useful especially in a case where there are many young genotyped animals but many of them shouldn't be included in ssGBLUP analysis because these are _interim_ analysis between two full genomic evaluations or for other reasons.
+In other words, the prediction for an animal is the sum of the estimated SNP effects, weighted according to its genotypes, from the overall ssGBLUP analyses. This approach is especially useful when there are many young genotyped animals but many of them should not be included in the ssGBLUP analysis because they are part of an _interim_ evaluation between two full genomic evaluations or are excluded for other reasons.

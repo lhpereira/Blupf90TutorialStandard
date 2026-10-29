@@ -1,7 +1,7 @@
 ---
 title: Quick tour of BLUPF90
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -9,18 +9,18 @@ tags: [introduction,tutorial]
 Trivial analyses for single-step GBLUP
 ======================================
 
-In ssGBLUP, the program requires 5 files: parameter, data, pedigree, marker, and cross-reference files. The first 3 files are the same as a regular animal model so you need two additional files for ssGBLUP. In this section, first, we describe the relationship matrices needed in the analysis. Then we introduce the 2 additional files and run the program.
+In a single-step genomic BLUP model (ssGBLUP), the BLUPF90 programs require 5 files: a parameter file, a data file, a pedigree file, a marker file, and a cross-reference file. The first 3 files are the same as those used in a regular animal model, so you need two additional files for ssGBLUP. In this section, we first describe the relationship matrices needed for the analysis. Then we introduce the 2 additional files and run the program.
 
 Single-step GBLUP
 -----------------
 
 ### Model and relationship matrices ###
 
-To demonstrate ssGBLUP, we will use the same animal model introduced in the previous section
+To demonstrate ssGBLUP, we will use the same animal model introduced in the previous section.
 $$
 y_{ijk} = A_i + S_j + \beta x_k + u_k + e_{ijk}
 $$
-where $u_k$ is the additive genetic effect for an animal $k$. We treat $S_j$ as a fixed effect. The mixed model equations are as follows.
+where $u_k$ is the additive genetic effect for animal $k$. We treat $S_j$ as a fixed effect. The mixed model equations are as follows.
 $$
 \left[
 \begin{array}{ll}
@@ -42,7 +42,7 @@ $$
 \end{array}
 \right]
 $$
-In ssGBLUP, $\mathbf{A}^{-1}$ is replaced with $\mathbf{H}^{-1}$ which has the following structure:
+In ssGBLUP, $\mathbf{A}^{-1}$ is replaced with $\mathbf{H}^{-1}$, which has the following structure:
 $$
 \mathbf{H}^{-1}
 =
@@ -55,13 +55,13 @@ $$
 \end{array}
 \right]
 $$
-where $\mathbf{G}$ is the genomic relationship matrix for genotyped animals and $\mathbf{A}_{22}$ is the subset of the numerator relationship matrix for genotyped animals. So this method can combine both genotyped and non-genotyped animals in the same equations.
+where $\mathbf{G}$ is the genomic relationship matrix for genotyped animals and $\mathbf{A}_{22}$ is the subset of the numerator relationship matrix for genotyped animals. Thus, this method can combine both genotyped and non-genotyped animals in the same equations.
 
-BLUPF90 constructs $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$ before the program solves the equations. The program also checks SNP markers and reports any errors it finds.
+BLUPF90+ constructs $\mathbf{G}^{-1}$ and $\mathbf{A}_{22}^{-1}$ before solving the equations. The program also checks SNP markers and reports any errors it finds.
 
 ### Files ###
 
-We can reuse the same data and pedigree files from the previous animal model. We, nevertheless, put different file names to data and pedigree to avoid the confusion.
+We can reuse the same data and pedigree files from the previous animal model. Nevertheless, we use different filenames for the data and pedigree files to avoid confusion.
 
 ~~~~~{language=text caption="data4.txt"}
   3.0  1  1  1.0   6
@@ -96,7 +96,7 @@ The following is the pedigree file.
  15  11  10
 ~~~~~
 
-The parameter file is also the same except for an option to read a marker file.
+The parameter file is also the same as in the previous example, except for an option to read a marker file.
 
 ~~~~~{language=blupf90 caption="param4.txt"}
 DATAFILE
@@ -127,9 +127,9 @@ pedigree4.txt
 OPTION SNP_file snp4.txt snp4index.txt
 ~~~~~
 
-The last line specifies the name of the marker file. The option SNP file makes BLUPF90 read the marker file `snp4.txt` and the cross-reference file `snp4index.txt`, and invoke the genomic computations. You can omit the second argument (the name of cross-reference file) if its name is the name of marker file + `_XrefID`. In this case, if the cross-reference file is `snp4.txt_XrefID`, you can omit the second argument in that option.
+The last line specifies the name of the marker file. The `SNP_file` option makes `blupf90+` read the marker file `snp4.txt` and the cross-reference file `snp4index.txt`, and invoke the genomic computations. You can omit the second argument (the name of the cross-reference file) if its name is the marker filename plus `_XrefID`. In this case, if the cross-reference file is `snp4.txt_XrefID`, you can omit the second argument in that option.
 
-We assume only 8 animals are genotyped (2, 4, 6, 10, 11, 12, 13, and 15). We also assume each genotyped animal has the original name and the marker file contains the names (ID002, ID004, ID006, ID010, ID011, ID012, ID013, and ID015, respectively). The following is the marker file.
+We assume that only 8 animals are genotyped (2, 4, 6, 10, 11, 12, 13, and 15). We also assume that each genotyped animal has an original ID and that the marker file contains these IDs (ID002, ID004, ID006, ID010, ID011, ID012, ID013, and ID015, respectively). The following is the marker file.
 
 ~~~~~{language=widetext caption="snp4.txt"}
 ID002 1212020111001211212000102001202022201112000110020102011001012212110122100001210101112200210
@@ -142,19 +142,19 @@ ID013 21220201012101211212221012001121221022120000100122111110011012111011221001
 ID015 2122020101210121121222101200112122102212000010012211111001101211101122100110220000021200210
 ~~~~~
 
-BLUPF90 accepts only a marker file prepared with the following rules.
+The BLUPF90 family accepts only a marker file prepared with the following rules.
 
-- A marker file is a text file with a fixed-width format including 2 columns.
-- The first column contains an animal's ID. You don't have to use the common ID to data and pedigree. So you can put the animal's original ID here. (BLUPF90 actually skip this column so you can put any information here.)
-- The second column contains an animal's genotypes. It has 4 possible value: `0` (homozygote), `1` (heterozygote), `2` (alternative homozygote) and `5` (missing or unknown).
-- All the second column must start with a fixed position in a line. In the above example, the second column always starts the 9th character.
-- Each genotyped animals must have the same number of markers.
-- You must not insert a space between 2 adjacent genotypes.
+- A marker file is a text file with a fixed-width format containing 2 columns.
+- The first column contains an animal's ID. You do not have to use the ID common to the data and pedigree files, so you can put the animal's original ID here. (The BLUPF90 family actually skips this column, so you can put any information here.)
+- The second column contains an animal's genotypes. Each genotype can have one of 4 possible values: `0` (homozygote), `1` (heterozygote), `2` (alternative homozygote), and `5` (missing or unknown).
+- The second column must start at a fixed position on each line. In the above example, the second column always starts at the 9th character.
+- Each genotyped animal must have the same number of markers.
+- You must not insert a space between two adjacent genotypes.
 - You don't have to sort the marker file by ID.
 
-The program will immediately stop if it finds the inconsistent data in the file.
+The program will stop immediately if it finds inconsistencies in the file.
 
-We need one more file to run BLUPF90. The last file is a cross-reference file that relates the integer code used in BLUPF90 to the ID in the marker file. This is a text file with 2 columns separated with spaces.
+We need one more file to run `blupf90+`. The last file is a cross-reference file that relates the integer code used in `blupf90+` to the ID in the marker file. This is a text file with 2 columns separated by spaces.
 
 ~~~~~{language=text caption="snp4index.txt"}
 2 ID002
@@ -167,24 +167,24 @@ We need one more file to run BLUPF90. The last file is a cross-reference file th
 15 ID015
 ~~~~~
 
-The order of animals must match that of the marker file. The first column contains the integer value (common to pedigree file) and the second line has the original ID found in the marker file. This file can be automatically prepared by RENUMF90.
+The order of the animals must match that in the marker file. The first column contains the integer value (common to the pedigree file), and the second column contains the original ID found in the marker file. This file can be prepared automatically by `renumf90`.
 
-Why do we use such a tricky example? Because the original-ID-in-the-marker-file situation actually happens in real life. A farm animal usually has a unique (original) ID and phenotypes. Pedigrees and genotypes are recorded with the original ID whereas BLUPF90 accepts only an integer value as an animal's ID. So we usually use RENUMF90 to replace the original ID with integer values and create renumbered files. However, the marker file is really huge and it is very inefficient to replace the original ID with an integer code. The RENUMF90 does not rewrite the marker file. Instead, RENUMF90 generates the cross-reference file to make the correspondence between the ID in markers and the ID in pedigree.
+Why do we use such a tricky example? Because the situation involving original IDs in the marker file actually occurs in real life. A farm animal usually has a unique (original) ID and phenotypes. Pedigrees and genotypes are recorded with the original ID, whereas `blupf90+` accepts only an integer value as an animal's ID. Therefore, we usually use `renumf90` to replace the original ID with integer values and create renumbered files. However, the marker file is very large, and replacing the original ID with an integer code is inefficient. RENUMF90 does not rewrite the marker file. Instead, RENUMF90 generates the cross-reference file to establish the correspondence between the IDs in the marker and pedigree files.
 
 
 ### Running the program ###
 
-We can now run BLUPF90 program with the 5 files. You can see a very long output from the genomic routine on the screen. We briefly explain what happens in this process.
+We can now run `blupf90+` with the 5 files. You can see a very long output from the genomic routine on the screen. We briefly explain what happens in this process.
 
-- Read the pedigrees for genotyped animals and compute $\mathbf{A}_{22}$.
+- Read the pedigree information for genotyped animals and compute $\mathbf{A}_{22}$.
 - Read SNP markers and perform quality control on the data (possibly remove unqualified markers).
 - Compute $\mathbf{G}$ and compare it with $\mathbf{A}_{22}$.
 - Compute $\mathbf{A}_{22}^{-1}$ and $\mathbf{G}^{-1}$.
-- Finally compute $\mathbf{G}^{-1}-\mathbf{A}_{22}^{-1}$ as a gingle matrix, and store them into a file.
-- After the process, BLUPF90 starts building the system of the mixed model equations with
-  $\mathbf{G}^{-1} - \mathbf{A}_{22}^{-1}$, and the program solve it.
+- Finally, compute $\mathbf{G}^{-1}-\mathbf{A}_{22}^{-1}$ as a single matrix and store it in a file.
+- After the process, BLUPF90+ starts building the system of the mixed model equations with
+  $\mathbf{G}^{-1} - \mathbf{A}_{22}^{-1}$ and solves it.
 
-There are many options to precisely control the genomic routine. Each option has the default value. The user should know the default behavior of the program. This explanation is out of the scope of this introductory chapter. We will see the details in the later chapters.
+There are many options to precisely control the genomic routine. Each option has a default value. The user should know the default behavior of the program. This explanation is outside the scope of this introductory chapter. We will see the details in later chapters.
 
 After running the program, we can find the solutions file.
 
@@ -213,25 +213,25 @@ trait/effect level  solution
    1   4        15     -0.21760840
 ~~~~~
 
-Single-step GBLUP directly provides GEBV (estimated breeding values enhanced with genomic information). The above solutions for animals are GEBV. The values are very different from the previous animal-model analysis. This is due to the model difference as well as the small data.
+Single-step GBLUP directly provides GEBVs (estimated breeding values enhanced with genomic information). The above solutions for the animals are GEBVs. The values are very different from those in the previous animal-model analysis. This is due to differences in the model as well as the small amount of data.
 
 
 Remarks
 -------
 
-If your marker data is relatively large, you should consider a more efficient way. Each relationship matrix created in the genomic routine is fully stored in memory i.e., dense matrix consuming a lot of memory. The required memory is 8$n^2$ /$1024^3$ GB (gigabytes) for each relationship matrix with $n$ genotyped animals. Computing time will be longer with many genotyped animals. To determine appropriate options to obtain stable GEBV, you should run the program many times. You can save a relationship matrix to a file and reuse the file.
+If your marker data set is relatively large, you should consider a more efficient approach. Each relationship matrix created in the genomic routine is stored fully in memory, i.e., as a dense matrix, consuming a lot of memory. The required memory is $8n^2/1024^3$ GB (gigabytes) for each relationship matrix with $n$ genotyped animals. Computation time will be longer with many genotyped animals. To determine appropriate options for obtaining stable GEBVs, you should run the program many times. You can save a relationship matrix to a file and reuse it.
 
-The PREGSF90 performs the genomic computations only. It can do the same computation as BLUPF90 does (except for the solution of mixed model equations). The best practice is to run PREGSF90 to check and clean up the markers, to compute the relationship matrices, and to save the matrices to files before you run BLUPF90. BLUPF90 can read the files generated with PREGSF90, and you can save your time.
+The PREGSF90 program performs only the genomic computations. It can perform the same genomic computations as BLUPF90 (except for solving the mixed model equations). The best practice is to run `preGSf90` to check and clean up the markers, compute the relationship matrices, and save the matrices to files before running `blupf90+`. The program can read the files generated by PREGSF90, so you can save time.
 
 
 Summary
 -------
 
 - BLUPF90 can perform a single-step GBLUP (ssGBLUP) analysis.
-- With ssGBLUP, a marker file and cross-reference file are needed in addition to data, pedigree, and parameter files needed in a regular animal model analysis.
-- An option in a parameter file is needed.
+- With ssGBLUP, a marker file and a cross-reference file are needed in addition to the data, pedigree, and parameter files required for a regular animal model analysis.
+- The parameter file must include an option for genomic analysis.
 - There are many options to control genomic computations. See the manual.
-- The marker file is a fixed-length text file with an animal's ID and genotypes.
-- Cross-reference (XrefID) file relates the animal's ID in marker file to integer code in the pedigree file. This file is generated by RENUMF90.
-- GEBV is directly obtained as a solution.
-- PREGSF90 is useful to save a relationship matrix to a file if you run the program several times using the same pedigree and genomic information. BLUPF90 reads the file so you can save time.
+- The marker file is a fixed-width text file with an animal's ID and genotypes.
+- A cross-reference (XrefID) file relates the animal's ID in the marker file to the integer code in the pedigree file. This file is generated by RENUMF90.
+- GEBVs are obtained directly as solutions.
+- A separate program, PREGSF90, is useful for saving a relationship matrix to a file if you run the program several times using the same pedigree and genomic information. BLUPF90 reads the file, so you can save time.

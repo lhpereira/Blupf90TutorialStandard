@@ -1,7 +1,7 @@
 ---
 title: Introduction
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -32,7 +32,7 @@ GIBBSF90+
 This tutorial
 -------------
 
-The descriptions in this tutorial are based on the old programs, but most of the content should still be applicable to the new ones. In the text, readers can simply replace the old program names with the new ones as shown below.
+The descriptions in this tutorial now refer to the new programs. If you are familiar with the old programs, you can simply replace the old program names with the new ones as shown below.
 
 | Old program in the text | New program name | Additional option         |
 |-------------------------|------------------|----------------------------|

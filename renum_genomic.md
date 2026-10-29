@@ -1,7 +1,7 @@
 ---
 title: Data preparation with RENUMF90
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
@@ -12,7 +12,7 @@ Genomic model with SNP-marker file
 Required files
 --------------
 
-Single-step GBLUP (ssGBLUP) model is an extension to the animal model. RENUMF90 can handle ssGBLUP using a similar parameter file to the animal model with an additional option. Let us use the previous files. The following files are the same as those used the previous ones with different names.
+The single-step GBLUP (ssGBLUP) model is an extension of the animal model. RENUMF90 can handle ssGBLUP using a parameter file similar to that for the animal model, with an additional option. Let us use the previous files. The following files are the same as those used previously, with different names.
 
 ~~~~~{language=text caption="rawdata4.txt"}
   ID006  A  1  1.0  3.0
@@ -47,7 +47,7 @@ The pedigree file is as follows.
  ID015  ID011  ID010
 ~~~~~
 
-An SNP-marker file should be prepared as a fixed-length text file with 2 columns: the original ID for column 1 and genotypes for column 2. See the previous chapter for the detailed explanation about the marker-file format. We use the same file shown before.
+An SNP-marker file should be prepared as a fixed-width text file with 2 columns: the original ID in column 1 and genotypes in column 2. See the previous chapter for a detailed explanation of the marker-file format. We use the same file shown before.
 
 ~~~~~{language=widetext caption="snp4.txt"}
 ID002 1212020111001211212000102001202022201112000110020102011001012212110122100001210101112200210010022220
@@ -60,9 +60,9 @@ ID013 21220201012101211212221012001121221022120000100122111110011012111011221001
 ID015 2122020101210121121222101200112122102212000010012211111001101211101122100110220000021200210010200120
 ~~~~~
 
-The marker file is never altered and duplicated by RENUMF90. The program just read the 1st column (the original ID) and make a table relating the renumbered animal ID to the original animal ID. The table will be saved as a cross-reference file.
+The marker file is neither altered nor duplicated by RENUMF90. The program only reads the 1st column (the original ID) and creates a table relating the renumbered animal ID to the original animal ID. The table is saved as a cross-reference file.
 
-We assume the same animal model described before except that the genomic information is included. The following is a parameter file to handle the SNP file.
+We assume the same animal model as before, except that genomic information is included. The following is a parameter file for handling the SNP file.
 
 ~~~~~{language=renumf90 caption="renum4.txt"}
 DATAFILE
@@ -95,13 +95,13 @@ snp4.txt
 0.5
 ~~~~~
 
-A new keyword `SNP_FILE` with the name of marker file tells RENUMF90 to properly treat the marker file. This keyword should be placed just after `FILE_POS`.
+A new keyword, `SNP_FILE`, followed by the name of the marker file, tells RENUMF90 how to process the marker file. This keyword should be placed just after `FILE_POS`.
 
 
 Renumbered files
 ----------------
 
-Running RENUMF90 with the above instruction, it generates several files in the same folder (directory). With this example, RENUMF90 will generate 5 files: `renf90.dat`, `renf90.par`, `renf90.tables`, `renadd04.ped`, and `snp4.txt_XrefID`. The last one is the cross-reference file (or simply, the XrefID file), which contains 2 columns for the renumbered ID and the original ID as follows.
+When running RENUMF90 with the above instruction, the program generates several files in the same folder (directory). In this example, RENUMF90 generates 5 files: `renf90.dat`, `renf90.par`, `renf90.tables`, `renadd04.ped`, and `snp4.txt_XrefID`. The last one is the cross-reference file (or simply the XrefID file), which contains 2 columns: the renumbered ID and the original ID, as follows.
 
 ~~~~~{language=text}
 11 ID002
@@ -114,15 +114,15 @@ Running RENUMF90 with the above instruction, it generates several files in the s
 1 ID015
 ~~~~~
 
-The order of genotyped animal is the same as those used the marker file. The name of this file is automatically determined and fixed as the original SNP file-name plus `_XrefID`, for example, `snp.txt_XrefID` for a marker file `snp.txt`. You cannot change the file name.
+The order of genotyped animals is the same as that in the marker file. The name of this file is automatically determined and fixed as the original SNP filename plus `_XrefID`, for example, `snp.txt_XrefID` for a marker file named `snp.txt`. You cannot change the filename.
 
-The renumbered parameter file `renf90.par` looks similar as before except the option found in the last line.
+The renumbered parameter file `renf90.par` looks similar to the previous one, except for the option on the last line.
 
 ~~~~~{language=blupf90}
 OPTION SNP_file snp4.txt
 ~~~~~
 
-The parameter file doesn't refer to the cross-reference file because, by default, BLUPF90 programs read the standard XrefID file (SNP file name + `XrefID`). Usually, you do not have to change the name of cross-reference file, so you just keep this option line. If you do rename the XrefID file, you have to add the XrefID file name to the option-line by hand (as shown in the quick tour).
+The parameter file does not refer to the cross-reference file because, by default, BLUPF90 programs read the standard XrefID file (SNP filename + `_XrefID`). Usually, you do not have to change the name of the cross-reference file, so you can keep this option line. If you rename the XrefID file, you must add its filename to the option line by hand (as shown in the quick tour).
 
 The renumbered pedigree is different from the previous one.
 
@@ -144,20 +144,28 @@ The renumbered pedigree is different from the previous one.
 15 0 0 3 0 0 0 0 1 ID003
 ~~~~~
 
-With genomics, RENUMF90 assigns new integer values to animals with the following rules.
+With genomics, RENUMF90 assigns new integer values to animals according to the following rules.
 
-1. First, the program assigns the smallest numbers to animals with the record(s). The order of assigned numbers will be random (that is, not following the order found in the data file).
-2. Secondly, the program assigns the larger numbers to genotyped animals. The order will be random (that is, not following the order found in the marker file).
-3. Lastly, the program assigns the larger numbers to animals found only in pedigree. The order will be random (that is, not be sorted in any way).
+1. First, the program assigns the smallest numbers to animals with records. The order of the assigned numbers is random (that is, it does not follow the order found in the data file).
+2. Second, the program assigns larger numbers to genotyped animals. The order is random (that is, it does not follow the order found in the marker file).
+3. Finally, the program assigns larger numbers to animals found only in the pedigree. The order is random (that is, it is not sorted in any particular way).
 
 You can find the genotyped animals in the renumbered pedigree file. When an animal is genotyped, the 6th column will be 10 or larger.
+
+Practical remarks
+-----------------
+
+With genomic analysis, BLUPF90+ and similar programs (including PREGSF90) read and manipulate genomic data.
+This process is complicated and controlled by many options, so you should provide some options in the parameter file.
+You can put the genomic options in the instruction file to pass them to the BLUPF90 parameter file.
+In a later section, we will introduce several options for genomic analyses.
 
 
 Summary
 -------
 
 - RENUMF90 supports ssGBLUP.
-- The instruction for ssGBLUP is the same as those used the animal model except for additional `SNP_FILE` keyword and the name of marker file.
-- RENUMF90 doesn't change the SNP marker file. Instead, it creates a cross-reference file relating the original ID to the renumbered ID. The name of the cross-reference file ends with `_XrefID` by default.
-- A suggested `renf90.par` contains the options line with SNP file.
-- The order of animals in the pedigree is determined as phenotyped animals the first, genotyped animals the second, and the other animals the last.
+- The instruction for ssGBLUP is the same as that used for the animal model, except for the additional `SNP_FILE` keyword and the name of the marker file.
+- RENUMF90 does not change the SNP marker file. Instead, it creates a cross-reference file relating the original ID to the renumbered ID. The name of the cross-reference file ends with `_XrefID` by default.
+- The suggested `renf90.par` contains an option line for the SNP file.
+- The order of animals in the pedigree is determined by placing phenotyped animals first, genotyped animals second, and the other animals last.

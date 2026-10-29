@@ -1,13 +1,15 @@
 ---
-title: Various models shown in Mrode (2014)
+title: Various models presented in Mrode and Pocrnic (2023)
 author: Yutaka Masuda
-date: April 2025
+date: August 2026
 subject: "Introduction to BLUPF90 suite programs"
 tags: [introduction,tutorial]
 ...
 
-In this chapter, we will see how BLUPF90 applies to a variety of models. We will look at various models in a standard textbook, *Linear Models for the Prediction of Animal Breeding Values*, written by Mrode (2014). We explain how to write a parameter file to handle a model in his book. We will not represent the content of data, pedigree, and genotype files. You can easily create these files if you have the book. We do not only solve the equations but do introduce new options and tricks useful for actual data analyses.
+In this chapter, we will see how BLUPF90 can be applied to a variety of models. We will examine the models presented in the standard textbook *Linear Models for the Prediction of the Genetic Merit of Animals*, 4th ed., by Mrode and Pocrnic (2023). We explain how to write a parameter file for each model in their book. The phenotypes, pedigrees, genotypes, and parameter files for the BLUPF90 family are available on the following GitHub page.
 
-As mentioned in the Introduction, the textbook has been updated (now in its 4th edition), and a new author, Ivan Pocrnić, has joined. The title of the textbook has also been changed to "Linear Models for the Prediction of the Genetic Merit of Animals". This tutorial is based on the previous edition (3rd edition, published in 2014), and a full update of the tutorial will be made in the future. The numerical examples in the new textbook are (mostly) the same as before, so I believe this tutorial is still useful with the new edition, except for differences in chapter structure.
+- [MrodesBook](https://github.com/MrodesBook)
 
-In addition, the computer programs have been updated to `blupf90+`. The parameter file format remains the same, so you can continue to use the previous parameter files with `blupf90+` without modification.
+In this section, we will use subsets of the phenotype, pedigree, and genotype data. We will not only solve the equations but also introduce new options and techniques useful for actual data analyses.
+
+Note that, in most of the numerical examples, we use `OPTION solv_method FSPAK` and occasionally `OPTION sol se` or `OPTION store_accuracy`. These options are useful for calculating more precise (exact) solutions to the mixed model equations and the reliability (or accuracy) of an estimated breeding value. However, these options are computationally demanding in terms of both computation time and memory requirements. They should not cause problems with small- to medium-sized data sets, but computations may be slow or the program may even crash if the data set is too large. Please be aware that the purpose of this chapter is to demonstrate how BLUPF90+ and related tools can handle a wide variety of models. For large-scale data sets, please read the subsequent chapter.
